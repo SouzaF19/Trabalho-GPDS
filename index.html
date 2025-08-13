@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGECA - Plataforma de Gestão de Eventos</title>
+    
+    <!-- Carrega a biblioteca de estilos Tailwind CSS para estilização rápida -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega as fontes do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Carrega a biblioteca de ícones Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Estilos CSS personalizados para a aplicação -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #820AD1; color: #111827; }
+        .page-section { display: none; } /* Esconde todas as "páginas" por padrão */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .app-layout { display: flex; flex-direction: column; height: 100svh; }
+        main { flex-grow: 1; overflow-y: auto; background-color: #FFFFFF; }
+        #logged-in-container { padding-bottom: 90px; }
+        #bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: #f0f1f5; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #6b7280; font-size: 0.75rem; transition: color 0.2s; text-decoration: none; width: 33.33%; }
+        .nav-item.active { color: #820AD1; font-weight: 600; }
+        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+        main::-webkit-scrollbar { display: none; }
+        main { -ms-overflow-style: none; scrollbar-width: none; }
+        .placeholder-message { display: flex; flex-direction: column; justify-content: center; align-items: center; color: #6b7280; padding: 2rem; text-align: center; }
+        .placeholder-message i { font-size: 3rem; margin-bottom: 1rem; color: #d1d5db; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Container principal da aplicaçao -->
+    <div id="app-container" class="app-layout">
+        <!-- Cabeçalho, visivel apenas quando o usuário esta logado -->
+        <header id="app-header" class="bg-white p-4 shadow-sm" style="display: none;">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 id="user-greeting" class="text-xl font-bold"></h1>
+                <div>
+                     <button onclick="app.showPage('profile')" class="text-gray-500 hover:text-[#820AD1] mr-4">
+                        <i class="fa-solid fa-user-gear fa-lg"></i>
+                    </button>
+                    <button onclick="app.handleLogout()" class="text-gray-500 hover:text-red-500">
+                        <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Área principal onde o conteúdo das paginas é renderizado. -->
+        <main id="app">
+            
+            <!-- Seção da pagina de Login -->
+            <section id="login-page" class="page-section w-full">
+                <div class="bg-white p-8 rounded-lg shadow-lg fade-in w-full max-w-sm m-4">
+                    <h2 class="text-3xl font-bold text-center mb-6">PGECA</h2>
+                    <p class="text-center text-gray-600 mb-8">Sua plataforma de eventos.</p>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label for="login-email" class="block text-gray-700 font-medium mb-2">Email</label>
+                            <input type="email" id="login-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#820AD1]" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="login-password" class="block text-gray-700 font-medium mb-2">Senha</label>
+                            <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#820AD1]" required>
+                        </div>
+                        <button type="submit" class="w-full bg-[#820AD1] text-white py-3 rounded-lg hover:bg-[#6c08ad] transition duration-300 font-semibold text-lg">Entrar</button>
+                    </form>
+                    <p class="text-center mt-6">
+                        Não tem uma conta? <a href="#" onclick="app.showPage('register')" class="text-[#820AD1] hover:underline font-semibold">Cadastre-se</a>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Seção da pagina de Cadastro -->
+            <section id="register-page" class="page-section w-full">
+                <div class="bg-white p-8 rounded-lg shadow-lg fade-in w-full max-w-sm m-4">
+                    <h2 class="text-3xl font-bold text-center mb-6">Criar Conta</h2>
+                    <form id="register-form">
+                        <div class="mb-4">
+                            <label for="register-name" class="block text-gray-700 font-medium mb-2">Nome Completo</label>
+                            <input type="text" id="register-name" class="w-full px-4 py-3 border rounded-lg" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="register-email" class="block text-gray-700 font-medium mb-2">Email</label>
+                            <input type="email" id="register-email" class="w-full px-4 py-3 border rounded-lg" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="register-password" class="block text-gray-700 font-medium mb-2">Senha</label>
+                            <input type="password" id="register-password" class="w-full px-4 py-3 border rounded-lg" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="register-type" class="block text-gray-700 font-medium mb-2">Tipo de Perfil</label>
+                            <select id="register-type" class="w-full px-4 py-3 border rounded-lg bg-white">
+                                <option value="PARTICIPANTE">Participante</option>
+                                <option value="ORGANIZADOR">Organizador</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-[#820AD1] text-white py-3 rounded-lg hover:bg-[#6c08ad] transition font-semibold">Cadastrar e Entrar</button>
+                    </form>
+                    <p class="text-center mt-6">
+                        Já possui uma conta? <a href="#" onclick="app.showPage('login')" class="text-[#820AD1] hover:underline font-semibold">Faça login</a>
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Container para todas as páginas que aparecem após o login -->
+            <div id="logged-in-container" class="p-4 md:p-6">
+                <!-- Seção da página Home (Lista de Eventos) -->
+                <section id="home-page" class="page-section fade-in">
+                    <h1 class="text-2xl font-bold mb-6">Próximos Eventos</h1>
+                    <div id="event-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- O JavaScript irá preencher esta área com os eventos -->
+                    </div>
+                </section>
+
+                <!-- Seção da página de Detalhes do Evento -->
+                <section id="event-details-page" class="page-section fade-in">
+                    <!-- O JavaScript irá preencher esta área com os detalhes do evento clicado -->
+                </section>
+
+                <!-- Seções vazias para as abas, que mostrarão mensagens padrão -->
+                <section id="my-events-page" class="page-section fade-in"></section>
+                <section id="my-certificates-page" class="page-section fade-in"></section>
+                <section id="my-organized-events-page" class="page-section fade-in"></section>
+                
+                <!-- Seção da página de Perfil do Usuário -->
+                 <section id="profile-page" class="page-section fade-in">
+                    <h2 class="text-2xl font-bold mb-6">Meu Perfil</h2>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <form id="profile-form">
+                             <div class="mb-4">
+                                <label for="profile-name" class="block font-medium mb-1">Nome Completo</label>
+                                <input type="text" id="profile-name" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="profile-email" class="block font-medium mb-1">Email</label>
+                                <input type="email" id="profile-email" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="profile-password" class="block font-medium mb-1">Nova Senha (deixe em branco para não alterar)</label>
+                                <input type="password" id="profile-password" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div class="flex justify-end gap-4">
+                                <button type="button" onclick="app.goBack()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                                <button type="submit" class="bg-[#820AD1] text-white py-2 px-6 rounded-lg hover:bg-[#6c08ad] transition font-semibold">Salvar Perfil</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Barra de navegação inferior, visivel apos o login -->
+        <nav id="bottom-nav" style="display: none;"></nav>
+
+        <!-- Modal para exibir notificações ao usuario -->
+        <div id="notification-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[200] hidden">
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm text-center m-4">
+                <p id="notification-message" class="text-lg"></p>
+                <button onclick="document.getElementById('notification-modal').classList.add('hidden')" class="mt-4 bg-[#820AD1] text-white py-2 px-8 rounded-lg hover:bg-[#6c08ad] transition font-semibold">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Objeto principal que controla toda a lógica do frontend.
+        const app = 
+        {
+            // Endereço base da API PHP
+            API_BASE_URL: 'api/index.php',
+            // Guarda o estado atual da aplicação (quem está logado, qual página está visível, etc.).
+            state: 
+            {
+                currentUser: null,
+                currentPage: 'login',
+                currentEventId: null, 
+                pageHistory: [],
+            },
+
+            // Função inicial que e chamada quando a página carrega
+            async init() 
+            {
+                // Adiciona escutadores aos formularios para interceptar o envio.
+                document.getElementById('login-form').addEventListener('submit', e => { e.preventDefault(); this.handleLogin(); });
+                document.getElementById('register-form').addEventListener('submit', e => { e.preventDefault(); this.handleRegister(); });
+                document.getElementById('profile-form').addEventListener('submit', e => { e.preventDefault(); this.handleUpdateProfile(); });
+                // Verifica se o usuário ja tem uma sessão ativa no servidor
+                await this.checkSession();
+            },
+            
+            // Função central para fazer requisições à API PHP.
+            async apiCall(action, method = 'GET', body = null) 
+            {
+                let url = `${this.API_BASE_URL}?action=${action}`;
+                if (method === 'GET' && body) 
+                {
+                    url += '&' + new URLSearchParams(body).toString();
+                }
+                const options = { method };
+                if (method !== 'GET') 
+                {
+                    options.headers = { 'Content-Type': 'application/json' };
+                    options.body = JSON.stringify(body);
+                }
+                try 
+                {
+                    const response = await fetch(url, options);
+                    const responseData = await response.json().catch(() => ({ message: 'Resposta inválida do servidor.' }));
+                    if (!response.ok) throw new Error(responseData.message || `Erro: ${response.statusText}`);
+                    return responseData;
+                } 
+                catch (error) 
+                {
+                    this.showNotification(error.message, 'error');
+                    return Promise.reject(error);
+                }
+            },
+
+            // Funções que lidam com ações do usuario
+
+            // Envia os dados de login para a API.
+            async handleLogin() 
+            {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                try 
+                {
+                    const result = await this.apiCall('login', 'POST', { email, password });
+                    if (result.success) 
+                    {
+                        this.state.currentUser = result.user;
+                        this.state.pageHistory = []; 
+                        const startPage = result.user.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
+                        this.showPage(startPage);
+                    }
+                } 
+                catch (error) {}
+            },
+
+            // Envia os dados de cadastro para a API.
+            async handleRegister() 
+            {
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const type = document.getElementById('register-type').value;
+                try 
+                {
+                    const result = await this.apiCall('register', 'POST', { name, email, password, type });
+                    if (result.success) 
+                    {
+                        this.state.currentUser = result.user;
+                        this.state.pageHistory = [];
+                        this.showNotification(`Bem-vindo(a), ${name}!`);
+                        const startPage = result.user.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
+                        this.showPage(startPage);
+                    }
+                } catch (error) { }
+            },
+            
+            // Encerra a sessao do usuário
+            async handleLogout() 
+            {
+                await this.apiCall('logout');
+                this.state.currentUser = null;
+                this.state.pageHistory = [];
+                this.showPage('login');
+            },
+
+            // Verifica com o servidor se o usuario ainda esta logado.
+            async checkSession() 
+            {
+                try 
+                {
+                    const result = await this.apiCall('check_session');
+                    if (result.loggedIn) 
+                    {
+                        this.state.currentUser = result.user;
+                        const startPage = this.state.currentUser.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
+                        this.showPage(startPage);
+                    } 
+                    else 
+                    {
+                        this.showPage('login');
+                    }
+                } 
+                catch (error) { this.showPage('login'); }
+            },
+            
+            // Envia os dados atualizados do perfil para a API
+            async handleUpdateProfile() 
+            {
+                const profileData = 
+                {
+                    name: document.getElementById('profile-name').value,
+                    email: document.getElementById('profile-email').value,
+                    password: document.getElementById('profile-password').value
+                };
+                try 
+                {
+                    const result = await this.apiCall('update_profile', 'POST', profileData);
+                    this.showNotification(result.message);
+                    this.state.currentUser.nome = profileData.name;
+                    this.state.currentUser.email = profileData.email;
+                    this.goBack();
+                    this.updateUI();
+                } 
+                catch(error) { }
+            },
+
+            // Funções que desenham as páginas na tela (Renderers) 
+
+            // Decide qual função de renderização chamar com base na página atual.
+            renderPageContent(pageId) 
+            {
+                const targetPage = document.getElementById(`${pageId}-page`);
+                if (!targetPage) return;
+                targetPage.style.display = 'block';
+
+                switch(pageId) 
+                {
+                    case 'home': this.renderEventList(); break;
+                    case 'event-details': this.renderEventDetails(this.state.currentEventId); break;
+                    case 'profile': this.renderProfileForm(); break;
+                    case 'my-events': this.renderMyEvents(); break;
+                    case 'my-certificates': this.renderMyCertificates(); break;
+                    case 'my-organized-events': this.renderMyOrganizedEvents(); break;
+                }
+            },
+
+            // Busca e exibe a lista de eventos na pagina inicial.
+            async renderEventList() 
+            {
+                const container = document.getElementById('event-list');
+                container.innerHTML = '<div class="placeholder-message col-span-full"><p>Carregando eventos...</p></div>';
+                try 
+                {
+                    const events = await this.apiCall('get_events');
+                    if (!events || events.length === 0) 
+                    {
+                        container.innerHTML = '<div class="placeholder-message col-span-full"><i class="fa-solid fa-calendar-xmark"></i><p>Nenhum evento agendado no momento.</p></div>';
+                        return;
+                    }
+                    container.innerHTML = events.map(event => 
+                    {
+                        const locationIcon = event.is_online == 1 ? 'fa-video' : 'fa-map-marker-alt';
+                        const locationText = event.is_online == 1 ? 'Evento Online' : event.local;
+                        const eventDate = new Date(event.data + 'T00:00:00');
+                        return `
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="app.showPage('event-details', { eventId: ${event.id} })">
+                                <img src="${event.imagem_url}" alt="Imagem do evento ${event.nome}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
+                                <div class="p-4">
+                                    <p class="text-sm text-[#820AD1] font-semibold">${eventDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</p>
+                                    <h3 class="text-lg font-bold mt-1 truncate">${event.nome}</h3>
+                                    <p class="text-gray-500 text-sm mt-1 truncate"><i class="fa-solid ${locationIcon} mr-2"></i>${locationText}</p>
+                                </div>
+                            </div>`;
+                    }).join('');
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message col-span-full"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar os eventos.</p></div>';
+                }
+            },
+
+            // Busca e exibe os detalhes de um evento específico.
+            async renderEventDetails(eventId) 
+            {
+                const container = document.getElementById('event-details-page');
+                container.innerHTML = '<div class="placeholder-message"><p>Carregando detalhes do evento...</p></div>';
+                try 
+                {
+                    const event = await this.apiCall(`get_event_details`, 'GET', { eventId });
+                    
+                    const locationIcon = event.is_online == 1 ? 'fa-video' : 'fa-map-marker-alt';
+                    const locationText = event.is_online == 1 ? 'Evento Online' : event.local;
+                    const eventDate = new Date(event.data + 'T00:00:00');
+                    
+                    let actionButtonHtml = '';
+                    if (this.state.currentUser.tipo === 'PARTICIPANTE') 
+                    {
+                        actionButtonHtml = `<button class="w-full bg-[#820AD1] text-white py-3 rounded-lg font-semibold">Inscrever-se</button>`;
+                    }
+
+                    container.innerHTML = `
+                        <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                        <div class="bg-white rounded-lg overflow-hidden">
+                            <img src="${event.imagem_url}" alt="Banner do Evento" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
+                            <div class="p-4">
+                                <h2 class="text-2xl font-bold">${event.nome}</h2>
+                                <p class="text-md text-gray-600 mt-3"><i class="fa-solid fa-user-tie text-gray-400 mr-2"></i>Ministrado por: <strong>${event.palestrante}</strong></p>
+                                <p class="text-md text-gray-600 mt-1"><i class="fa-solid fa-calendar-alt text-gray-400 mr-2"></i>${eventDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                <p class="text-md text-gray-600 mt-1"><i class="fa-solid ${locationIcon} text-gray-400 mr-2"></i>${locationText}</p>
+                                <div class="mt-6">${actionButtonHtml}</div>
+                                <div class="mt-8"><h3 class="text-xl font-bold border-b pb-2 mb-4">Sobre o Evento</h3><p class="text-gray-700 leading-relaxed">${event.descricao}</p></div>
+                                <div class="mt-8"><h3 class="text-xl font-bold border-b pb-2 mb-4">Programação</h3><div class="space-y-3">${event.program.map(item => `<div class="flex items-center"><span class="bg-gray-100 text-[#820AD1] font-bold py-1 px-3 rounded-full mr-4">${item.horario.substring(0,5)}</span><p>${item.titulo}</p></div>`).join('')}</div></div>
+                            </div>
+                        </div>`;
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar os detalhes do evento.</p></div>';
+                }
+            },
+            
+            // Preenche o formulario de perfil com os dados do usuario logado.
+            renderProfileForm() 
+            {
+                if (!this.state.currentUser) return;
+                document.getElementById('profile-name').value = this.state.currentUser.nome;
+                document.getElementById('profile-email').value = this.state.currentUser.email;
+                document.getElementById('profile-password').value = '';
+            },
+
+            // Exibe a mensagem padrão para a aba Minhas Inscrições
+            renderMyEvents() 
+            {
+                const container = document.getElementById('my-events-page');
+                container.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-6">Minhas Inscrições</h2>
+                    <div class="placeholder-message"><i class="fa-solid fa-ticket"></i><p>Você ainda não se inscreveu em nenhum evento.</p></div>`;
+            },
+            
+            // Exibe a mensagem padrão para a aba Meus Certificados.
+            renderMyCertificates() 
+            {
+                const container = document.getElementById('my-certificates-page');
+                container.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-6">Meus Certificados</h2>
+                    <div class="placeholder-message"><i class="fa-solid fa-award"></i><p>Você ainda não possui certificados.</p></div>`;
+            },
+
+            // Exibe a mensagem padrão para a aba Meus Eventos do organizador.
+            renderMyOrganizedEvents() 
+            {
+                const container = document.getElementById('my-organized-events-page');
+                container.innerHTML = `
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Meus Eventos Criados</h2>
+                        <button class="bg-[#820AD1] text-white py-2 px-4 rounded-full hover:bg-[#6c08ad] transition font-semibold">
+                            <i class="fa-solid fa-plus mr-2"></i>Novo Evento
+                        </button>
+                    </div>
+                    <div class="placeholder-message"><i class="fa-solid fa-star"></i><p>Você ainda não criou nenhum evento.</p></div>`;
+            },
+
+            // Funções auxiliares para controlar a interface 
+
+            // Controla qual página esta visivel.
+            showPage(pageId, data = null) 
+            {
+                if (this.state.currentPage !== pageId && this.state.currentPage !== 'going-back') 
+                {
+                    this.state.pageHistory.push({ page: this.state.currentPage, data: { eventId: this.state.currentEventId }});
+                }
+                this.state.currentPage = pageId;
+                if (data && data.eventId !== undefined) this.state.currentEventId = data.eventId;
+                
+                this.updateUI();
+                this.renderPageContent(pageId);
+                window.scrollTo(0, 0); 
+            },
+            // Permite voltar para a pagina anterior
+            goBack() 
+            {
+                const lastPage = this.state.pageHistory.pop();
+                if (lastPage && lastPage.page) 
+                {
+                    this.state.currentPage = 'going-back'; 
+                    this.showPage(lastPage.page, lastPage.data);
+                }
+                else 
+                {
+                    const startPage = this.state.currentUser.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
+                    this.showPage(startPage);
+                }
+            },
+            // Atualiza a interface geral (cabeçalho, rodape) com base no estado de login.
+            updateUI() 
+            {
+                const header = document.getElementById('app-header');
+                const bottomNav = document.getElementById('bottom-nav');
+                const mainContent = document.querySelector('main');
+                document.querySelectorAll('.page-section').forEach(s => { s.style.display = 'none'; });
+
+                if (this.state.currentUser) 
+                {
+                    mainContent.style.backgroundColor = '#FFFFFF';
+                    mainContent.classList.remove('flex', 'flex-col', 'items-center', 'justify-center');
+                    document.body.style.backgroundColor = '#FFFFFF';
+                    header.style.display = 'flex';
+                    bottomNav.style.display = 'flex';
+                    document.getElementById('user-greeting').innerText = `Olá, ${this.state.currentUser.nome.split(' ')[0]}`;
+                    this.updateBottomNav();
+                } 
+                else 
+                {
+                    mainContent.style.backgroundColor = '#820AD1';
+                    mainContent.classList.add('flex', 'flex-col', 'items-center', 'justify-center');
+                    document.body.style.backgroundColor = '#820AD1';
+                    header.style.display = 'none';
+                    bottomNav.style.display = 'none';
+                }
+            },
+            // Atualiza a barra de navegação inferior com base no tipo de usuario.
+            updateBottomNav() 
+            {
+                const nav = document.getElementById('bottom-nav');
+                if (!this.state.currentUser) 
+                {
+                    nav.innerHTML = ''; return;
+                }
+                const userType = this.state.currentUser.tipo;
+                const page = this.state.currentPage;
+                let linksHtml = '';
+
+                if (userType === 'PARTICIPANTE') 
+                {
+                    linksHtml = `
+                        <a href="#" class="nav-item ${['home', 'event-details'].includes(page) ? 'active' : ''}" onclick="app.showPage('home')"><i class="fa-solid fa-house"></i><span>Eventos</span></a>
+                        <a href="#" class="nav-item ${page === 'my-events' ? 'active' : ''}" onclick="app.showPage('my-events')"><i class="fa-solid fa-ticket"></i><span>Inscrições</span></a>
+                        <a href="#" class="nav-item ${page === 'my-certificates' ? 'active' : ''}" onclick="app.showPage('my-certificates')"><i class="fa-solid fa-award"></i><span>Certificados</span></a>`;
+                } 
+                else if (userType === 'ORGANIZADOR') 
+                {
+                     linksHtml = `
+                        <a href="#" class="nav-item ${page === 'my-organized-events' ? 'active' : ''}" onclick="app.showPage('my-organized-events')"><i class="fa-solid fa-star"></i><span>Meus Eventos</span></a>
+                        <a href="#" class="nav-item ${['home', 'event-details'].includes(page) ? 'active' : ''}" onclick="app.showPage('home')"><i class="fa-solid fa-calendar-days"></i><span>Ver Todos</span></a>`;
+                }
+                nav.innerHTML = linksHtml;
+            },
+            // Exibe o modal de notificaçao.
+            showNotification(message, type = 'success') 
+            {
+                const modal = document.getElementById('notification-modal');
+                const messageP = document.getElementById('notification-message');
+                messageP.textContent = message;
+                messageP.className = type === 'error' ? 'text-lg text-red-700' : 'text-lg text-gray-800';
+                modal.classList.remove('hidden');
+            }
+        };
+
+        // Inicia a aplicaçao quando a janela do navegador termina de carregar
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>

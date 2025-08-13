@@ -1,0 +1,101 @@
+PGECA - Plataforma de Gestão de Eventos (Versão Simplificada)
+
+Tecnologias Utilizadas
+
+- Frontend:
+  - HTML
+  - CSS com [Tailwind CSS](https://tailwindcss.com/)
+  - JavaScript com requisições `fetch` (AJAX)
+
+- Backend:
+  - PHP
+  - PDO para conexão segura com o banco de dados
+
+- Banco de Dados:
+  - MySQL
+
+- Ambiente de Servidor:
+  - Apache (utilizado em conjunto com o pacote XAMPP)
+
+Pré-requisitos
+
+Antes de começar, garanta que você tenha um ambiente de servidor local instalado e em execução. 
+A recomendação é utilizar o XAMPP, que já inclui Apache, PHP e MySQL.
+
+- Download do XAMPP: (https://www.apachefriends.org/pt_br/index.html)
+
+Passo a Passo da Instalação
+
+Siga atentamente os passos abaixo para configurar e executar o projeto.
+
+- Passo 1: Configuração do Banco de Dados
+
+1.  Inicie o XAMPP: Abra o painel de controle do XAMPP e inicie os módulos **Apache** e **MySQL**.
+
+2.  Acesse o phpMyAdmin: Com os serviços rodando, abra seu navegador e acesse `http://localhost/phpmyadmin/`.
+
+3.  Crie o Banco de Dados:
+    - No menu à esquerda, clique em "Novo".
+    - No campo "Nome da base de dados", digite `pgeca_db`.
+    - No campo de "Colação" (collation), selecione `utf8mb4_unicode_ci`.
+    - Clique em "Criar".
+
+4.  Importe o Script SQL:
+    - Com o banco de dados `pgeca_db` selecionado, clique na aba "Importar" no menu superior.
+    - Clique em "Escolher arquivo" e selecione o arquivo `BancoDados.sql` que acompanha este projeto.
+    - Role a página para baixo e clique no botão "Executar".
+
+    Ao final, você verá uma mensagem de sucesso e as tabelas `usuarios`, `eventos` e `programacao` serão listadas no menu à esquerda.
+
+- Passo 2: Configuração dos Arquivos do Projeto
+
+1.  Localize a Pasta `htdocs`: A pasta `htdocs` é o diretório raiz onde o servidor Apache busca os arquivos. 
+No XAMPP, ela geralmente se encontra em `C:/xampp/htdocs/`.
+
+2.  Crie a Estrutura de Pastas:
+    - Dentro de `htdocs`, crie uma pasta principal para o projeto chamada `pgeca`.
+    - Dentro de `pgeca`, crie as subpastas `api` e `config`.
+
+    A estrutura final deve ser a seguinte:
+
+    C:/xampp/htdocs/
+    └── pgeca/
+        ├── api/
+        ├── config/
+        └── index.html
+
+3.  Copie os Arquivos:
+    - Coloque o arquivo `index.html` na raiz da pasta `pgeca/`.
+    - Coloque o arquivo `index.php` (da API) dentro da pasta `pgeca/api/`.
+    - Coloque o arquivo `Database.php` dentro da pasta `pgeca/config/`.
+
+- Passo 3: Verificação da Conexão com o Banco
+
+1.  Abra o arquivo `pgeca/config/Database.php` em um editor de código.
+2.  Verifique se as credenciais correspondem à sua configuração do MySQL. A configuração padrão do XAMPP geralmente é:
+
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'root');
+    define('DB_PASS', ''); // Senha em branco
+    define('DB_NAME', 'pgeca_db');
+  
+3.  Se sua senha do MySQL for diferente, altere o valor de `DB_PASS`.
+
+- Passo 4: Executando a Aplicação
+
+1.  Certifique-se de que os serviços Apache e MySQL estão em execução no XAMPP.
+2.  Abra seu navegador web (Google Chrome, Firefox, etc.).
+3.  Digite o seguinte endereço na barra de URL:
+    
+    http://localhost/pgeca/
+
+4.  A tela de login da aplicação deve ser exibida.
+
+5. Credenciais de Teste
+
+O banco de dados esta somente com um evento de exemplo. 
+
+Você deve criar novas contas através da tela de cadastro.
+
+Então deve-se cadastrar dois usuarios, um no modo "Participante" e um no "Organizador" para facilitar os testes.
+
