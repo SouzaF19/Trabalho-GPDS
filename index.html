@@ -3,46 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PGECA - Plataforma de Gestão de Eventos</title>
-    
-    <!-- Carrega a biblioteca de estilos Tailwind CSS para estilização rápida -->
+    <title>PGECA - Plataforma de Gestão de Eventos</title>  
+    <!-- Importa o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carrega as fontes do Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Importa a fonte 'Inter' do Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Carrega a biblioteca de ícones Font Awesome -->
+    <!-- Importa a biblioteca Font Awesome para ícone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Estilos CSS personalizados para a aplicação -->
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #820AD1; color: #111827; }
-        .page-section { display: none; } /* Esconde todas as "páginas" por padrão */
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .app-layout { display: flex; flex-direction: column; height: 100svh; }
-        main { flex-grow: 1; overflow-y: auto; background-color: #FFFFFF; }
-        #logged-in-container { padding-bottom: 90px; }
-        #bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: #f0f1f5; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; padding: 8px 0; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #6b7280; font-size: 0.75rem; transition: color 0.2s; text-decoration: none; width: 33.33%; }
-        .nav-item.active { color: #820AD1; font-weight: 600; }
-        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
-        main::-webkit-scrollbar { display: none; }
-        main { -ms-overflow-style: none; scrollbar-width: none; }
-        .placeholder-message { display: flex; flex-direction: column; justify-content: center; align-items: center; color: #6b7280; padding: 2rem; text-align: center; }
-        .placeholder-message i { font-size: 3rem; margin-bottom: 1rem; color: #d1d5db; }
+        body 
+        { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #820AD1; 
+            color: #111827; 
+        }
+        /* Esconde todas as seções por padrão; o JavaScript controla qual é exibida. */
+        .page-section 
+        { 
+            display: none; 
+        }
+
+        /* Animação de surgimento suave para elementos */
+        .fade-in 
+        { 
+            animation: fadeIn 0.4s ease-in-out; 
+        }
+
+        @keyframes fadeIn 
+        { 
+            from 
+            { 
+                opacity: 0; 
+                transform: translateY(15px); 
+            } 
+            to 
+            { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        
+        .app-layout 
+        { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100svh; 
+        }
+
+        main 
+        { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            background-color: #FFFFFF; 
+        }
+
+        /* Garante que o menu inferior não sobreponha o conteudo */
+        #logged-in-container 
+        { 
+            padding-bottom: 90px; 
+        }
+
+        /* Estilos da barra de navegação inferior fixa */
+        #bottom-nav 
+        { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background-color: #f0f1f5; 
+            border-top: 1px solid #e5e7eb; 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 8px 0; 
+            z-index: 100; 
+        }
+
+        .nav-item 
+        { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #6b7280; 
+            font-size: 0.75rem; 
+            transition: color 0.2s; 
+            text-decoration: none; 
+            width: 33.33%; 
+        }
+
+        .nav-item.active 
+        { 
+            color: #820AD1; 
+            font-weight: 600; 
+        }
+
+        .nav-item i 
+        { 
+            font-size: 1.5rem; 
+            margin-bottom: 4px; 
+        }
+
+        /* Esconde a barra de rolagem do conteúdo principal. */
+        main::-webkit-scrollbar 
+        { 
+            display: none; 
+        }
+
+        main 
+        { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+
+        /* Gera um QR Code de exemplo como imagem de fundo */
+        .qr-code-placeholder 
+        { 
+            width: 120px; 
+            height: 120px; 
+            background-image: url('https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=PGECA-INSCRICAO-12345&bgcolor=f0f1f5'); 
+            background-size: cover; 
+            border-radius: 0.75rem; 
+        }
+
+        /* Estilos para as estrelas de avaliação */
+        .rating-stars .fa-star 
+        { 
+            color: #d1d5db; 
+            cursor: pointer; 
+            transition: color 0.2s; 
+        }
+        .rating-stars:hover .fa-star 
+        { 
+            color: #f59e0b; 
+        }
+        .rating-stars .fa-star:hover ~ .fa-star 
+        { 
+            color: #d1d5db; 
+        }
+        .rating-stars.selected .fa-star 
+        { 
+            color: #f59e0b; 
+        }
+        .rating-stars.selected .fa-star:hover ~ .fa-star 
+        { 
+            color: #d1d5db; 
+        }
+
+        /* Estilos para mensagens de Carregando... */
+        .placeholder-message 
+        { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            color: #6b7280; 
+            padding: 2rem; 
+            text-align: center; 
+        }
+        .placeholder-message i 
+        { 
+            font-size: 3rem; 
+            margin-bottom: 1rem; 
+            color: #d1d5db; 
+        }
     </style>
 </head>
+
 <body class="antialiased">
 
     <!-- Container principal da aplicaçao -->
     <div id="app-container" class="app-layout">
-        <!-- Cabeçalho, visivel apenas quando o usuário esta logado -->
+        <!-- Cabeçalho (visível apenas quando logado) -->
         <header id="app-header" class="bg-white p-4 shadow-sm" style="display: none;">
             <div class="container mx-auto flex justify-between items-center">
                 <h1 id="user-greeting" class="text-xl font-bold"></h1>
                 <div>
-                     <button onclick="app.showPage('profile')" class="text-gray-500 hover:text-[#820AD1] mr-4">
+                    <button onclick="app.showPage('profile')" class="text-gray-500 hover:text-[#820AD1] mr-4">
                         <i class="fa-solid fa-user-gear fa-lg"></i>
                     </button>
                     <button onclick="app.handleLogout()" class="text-gray-500 hover:text-red-500">
@@ -52,10 +188,10 @@
             </div>
         </header>
 
-        <!-- Área principal onde o conteúdo das paginas é renderizado. -->
+        <!-- Área de conteúdo principal que muda dinamicamente -->
         <main id="app">
             
-            <!-- Seção da pagina de Login -->
+            <!-- Seção: Login -->
             <section id="login-page" class="page-section w-full">
                 <div class="bg-white p-8 rounded-lg shadow-lg fade-in w-full max-w-sm m-4">
                     <h2 class="text-3xl font-bold text-center mb-6">PGECA</h2>
@@ -77,7 +213,7 @@
                 </div>
             </section>
 
-            <!-- Seção da pagina de Cadastro -->
+            <!-- Seção: Cadastro de novo usuario -->
             <section id="register-page" class="page-section w-full">
                 <div class="bg-white p-8 rounded-lg shadow-lg fade-in w-full max-w-sm m-4">
                     <h2 class="text-3xl font-bold text-center mb-6">Criar Conta</h2>
@@ -109,32 +245,161 @@
                 </div>
             </section>
             
-            <!-- Container para todas as páginas que aparecem após o login -->
+            <!-- Container para as seções visíveis apenas quando o usuário esta logado -->
             <div id="logged-in-container" class="p-4 md:p-6">
-                <!-- Seção da página Home (Lista de Eventos) -->
+                <!-- Seção: Home (Lista de todos os eventos) -->
                 <section id="home-page" class="page-section fade-in">
                     <h1 class="text-2xl font-bold mb-6">Próximos Eventos</h1>
-                    <div id="event-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- O JavaScript irá preencher esta área com os eventos -->
+                    <div id="event-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </section>
+
+                <!-- Seção: Detalhes de um Evento -->
+                <section id="event-details-page" class="page-section fade-in"></section>
+                
+                <!-- Seção: Formulario para Criar/Editar Evento -->
+                <section id="edit-event-page" class="page-section fade-in">
+                    <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                    <h2 id="edit-event-title" class="text-2xl font-bold mb-6"></h2>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <form id="edit-event-form">
+                            <input type="hidden" id="edit-event-id">
+                            <div class="mb-4">
+                                <label for="edit-event-name" class="block font-medium mb-1">Nome do Evento</label>
+                                <input type="text" id="edit-event-name" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="edit-event-image" class="block font-medium mb-1">URL da Imagem do Evento (Opcional)</label>
+                                <input type="url" id="edit-event-image" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="https://exemplo.com/imagem.jpg">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="edit-event-date" class="block font-medium mb-1">Data</label>
+                                    <input type="date" id="edit-event-date" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label for="edit-event-location" class="block font-medium mb-1">Local</label>
+                                    <input type="text" id="edit-event-location" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="edit-event-speaker" class="block font-medium mb-1">Nome do Palestrante/Ministrante</label>
+                                    <input type="text" id="edit-event-speaker" class="w-full p-3 border border-gray-300 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label for="edit-event-workload" class="block font-medium mb-1">Carga Horária (em horas)</label>
+                                    <input type="number" id="edit-event-workload" class="w-full p-3 border border-gray-300 rounded-lg" min="1" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="edit-event-description" class="block font-medium mb-1">Descrição</label>
+                                <textarea id="edit-event-description" rows="4" class="w-full p-3 border border-gray-300 rounded-lg" required></textarea>
+                            </div>
+                            <div class="mb-4 space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="edit-event-is-online" class="h-5 w-5 text-[#820AD1] border-gray-300 rounded focus:ring-[#820AD1]">
+                                    <span class="ml-2 text-gray-700">Evento Online</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="edit-event-allow-submission" class="h-5 w-5 text-[#820AD1] border-gray-300 rounded focus:ring-[#820AD1]" onchange="app.toggleReviewerInfo(this.checked)">
+                                    <span class="ml-2 text-gray-700">Permitir submissão de trabalhos</span>
+                                </label>
+                            </div>
+                            <div id="reviewer-info-container" class="hidden mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-sm text-blue-800 font-semibold mb-2">Informações do Responsável pela Avaliação dos Trabalhos</p>
+                                <div>
+                                    <label for="edit-event-reviewer-formation" class="block font-medium text-sm mb-1">Formação Acadêmica/Profissional</label>
+                                    <input type="text" id="edit-event-reviewer-formation" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold border-b pb-2 mb-3">Programação do Evento</h3>
+                                <div id="program-list" class="space-y-3"></div>
+                                <button type="button" onclick="app.addProgramItem()" class="mt-3 bg-blue-100 text-blue-800 py-2 px-4 rounded-lg hover:bg-blue-200 transition font-semibold text-sm">
+                                    <i class="fa-solid fa-plus mr-2"></i>Adicionar Horário
+                                </button>
+                            </div>
+                            <div class="flex justify-end gap-4">
+                                <button type="button" onclick="app.goBack()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                                <button type="submit" class="bg-[#820AD1] text-white py-2 px-6 rounded-lg hover:bg-[#6c08ad] transition font-semibold">Salvar Alterações</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+                
+                <!-- Seção: Meus Eventos Criados (Organizador) -->
+                <section id="my-organized-events-page" class="page-section fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Meus Eventos Criados</h2>
+                        <button onclick="app.showPage('edit-event')" class="bg-[#820AD1] text-white py-2 px-4 rounded-full hover:bg-[#6c08ad] transition font-semibold">
+                            <i class="fa-solid fa-plus mr-2"></i>Novo Evento
+                        </button>
+                    </div>
+                    <div id="my-organized-event-list" class="space-y-8"></div>
+                </section>
+
+                <!-- Seção: Gerenciar Evento Específico (Organizador) -->
+                <section id="manage-event-page" class="page-section fade-in"></section>
+
+                <!-- Seção: Gerenciar/Emitir Certificados (Organizador) -->
+                <section id="manage-certificates-page" class="page-section fade-in"></section>
+                  
+                <!-- Seção: Relatorio de Avaliações do Evento (Organizador) -->
+                <section id="event-report-page" class="page-section fade-in"></section>
+
+                <!-- Seção: Avaliar Trabalhos Submetidos (Organizador) -->
+                <section id="review-works-page" class="page-section fade-in"></section>
+
+                <!-- Seção: Formulário de Submissão de Trabalho (Participante) -->
+                <section id="submit-work-page" class="page-section fade-in">
+                    <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                    <h2 class="text-2xl font-bold mb-2">Submeter Trabalho</h2>
+                    <p id="submit-work-event-name" class="text-gray-600 mb-6"></p>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <form id="submit-work-form">
+                            <input type="hidden" id="submit-work-event-id" />
+                            <div class="mb-4">
+                                <label for="work-title" class="block font-medium mb-1">Título do Trabalho</label>
+                                <input type="text" id="work-title" name="title" class="w-full p-3 border rounded-lg" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="work-authors" class="block font-medium mb-1">Autores (separados por vírgula)</label>
+                                <input type="text" id="work-authors" name="authors" class="w-full p-3 border rounded-lg" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="work-abstract" class="block font-medium mb-1">Resumo</label>
+                                <textarea id="work-abstract" name="abstract" rows="5" class="w-full p-3 border rounded-lg" required></textarea>
+                            </div>
+                            <div class="mb-6">
+                                <label for="work-file" class="block font-medium mb-1">Anexar Arquivo (PDF/DOCX)</label>
+                                <input type="file" id="work-file" name="workFile" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-[#820AD1] hover:file:bg-violet-100" accept=".pdf,.doc,.docx" required>
+                            </div>
+                            <div class="flex justify-end gap-4">
+                                <button type="button" onclick="app.goBack()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg">Cancelar</button>
+                                <button type="submit" class="bg-[#820AD1] text-white py-2 px-6 rounded-lg font-semibold">Enviar Trabalho</button>
+                            </div>
+                        </form>
                     </div>
                 </section>
 
-                <!-- Seção da página de Detalhes do Evento -->
-                <section id="event-details-page" class="page-section fade-in">
-                    <!-- O JavaScript irá preencher esta área com os detalhes do evento clicado -->
+                <!-- Seção: Minhas Inscrições (Participante) -->
+                <section id="my-events-page" class="page-section fade-in">
+                    <h2 class="text-2xl font-bold mb-6">Minhas Inscrições</h2>
+                    <div id="my-event-list" class="space-y-8"></div>
                 </section>
 
-                <!-- Seções vazias para as abas, que mostrarão mensagens padrão -->
-                <section id="my-events-page" class="page-section fade-in"></section>
-                <section id="my-certificates-page" class="page-section fade-in"></section>
-                <section id="my-organized-events-page" class="page-section fade-in"></section>
-                
-                <!-- Seção da página de Perfil do Usuário -->
-                 <section id="profile-page" class="page-section fade-in">
+                <!-- Seção: Meus Certificados (Participante) -->
+                <section id="my-certificates-page" class="page-section fade-in">
+                    <h2 class="text-2xl font-bold mb-6">Meus Certificados</h2>
+                    <div id="my-certificate-list" class="space-y-4"></div>
+                </section>
+
+                <!-- Seção: Meu Perfil (todos os usuários) -->
+                <section id="profile-page" class="page-section fade-in">
                     <h2 class="text-2xl font-bold mb-6">Meu Perfil</h2>
                     <div class="bg-gray-50 p-6 rounded-lg">
                         <form id="profile-form">
-                             <div class="mb-4">
+                               <div class="mb-4">
                                 <label for="profile-name" class="block font-medium mb-1">Nome Completo</label>
                                 <input type="text" id="profile-name" class="w-full p-3 border border-gray-300 rounded-lg" required>
                             </div>
@@ -156,60 +421,79 @@
             </div>
         </main>
 
-        <!-- Barra de navegação inferior, visivel apos o login -->
+        <!-- Barra de navegação inferior -->
         <nav id="bottom-nav" style="display: none;"></nav>
 
-        <!-- Modal para exibir notificações ao usuario -->
+        <!-- Modal de Notificação -->
         <div id="notification-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[200] hidden">
             <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm text-center m-4">
                 <p id="notification-message" class="text-lg"></p>
                 <button onclick="document.getElementById('notification-modal').classList.add('hidden')" class="mt-4 bg-[#820AD1] text-white py-2 px-8 rounded-lg hover:bg-[#6c08ad] transition font-semibold">OK</button>
             </div>
         </div>
+
+        <!-- Modal de Pré-visualização de Certificado -->
+        <div id="certificate-preview-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[200] hidden p-4">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-2xl w-full text-center m-4 border-4 border-[#820AD1]">
+                <i class="fa-solid fa-award text-5xl text-yellow-500 mb-4"></i>
+                <h2 class="text-2xl font-bold text-[#820AD1] mb-2">CERTIFICADO DE PARTICIPAÇÃO</h2>
+                <p id="certificate-preview-text" class="text-lg leading-relaxed my-6"></p>
+                <button onclick="document.getElementById('certificate-preview-modal').classList.add('hidden')" class="mt-4 bg-gray-200 text-gray-800 py-2 px-8 rounded-lg hover:bg-gray-300 transition font-semibold">Fechar</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Objeto principal que controla toda a lógica do frontend.
+        // Objeto 'app' que encapsula toda a lógica da aplicação (Single Page Application).
         const app = 
         {
-            // Endereço base da API PHP
             API_BASE_URL: 'api/index.php',
-            // Guarda o estado atual da aplicação (quem está logado, qual página está visível, etc.).
+            // 'state' armazena o estado dinâmico da aplicaçao.
             state: 
             {
-                currentUser: null,
-                currentPage: 'login',
-                currentEventId: null, 
-                pageHistory: [],
+                currentUser: null,        // Dados do usuário logado.
+                currentPage: 'login',     // Página atual sendo exibida.
+                currentEventId: null,     // ID do evento em visualização/edição.
+                pageHistory: [],          // Histórico de navegação para a função voltar.
             },
 
-            // Função inicial que e chamada quando a página carrega
+            // Função de inicialização, chamada quando a página carrega.
             async init() 
             {
-                // Adiciona escutadores aos formularios para interceptar o envio.
+                // Adiciona listeners aos formulários para interceptar o envio.
                 document.getElementById('login-form').addEventListener('submit', e => { e.preventDefault(); this.handleLogin(); });
                 document.getElementById('register-form').addEventListener('submit', e => { e.preventDefault(); this.handleRegister(); });
+                document.getElementById('edit-event-form').addEventListener('submit', e => { e.preventDefault(); this.handleSaveEvent(); });
                 document.getElementById('profile-form').addEventListener('submit', e => { e.preventDefault(); this.handleUpdateProfile(); });
-                // Verifica se o usuário ja tem uma sessão ativa no servidor
+                document.getElementById('submit-work-form').addEventListener('submit', e => { e.preventDefault(); this.handleSubmitWork(); });
+                // Verifica se há uma sessão de usuário ativa no servidor.
                 await this.checkSession();
             },
             
-            // Função central para fazer requisições à API PHP.
-            async apiCall(action, method = 'GET', body = null) 
+            // Função central para todas as requisições ao backend (API).
+            async apiCall(action, method = 'GET', body = null, isFile = false) 
             {
                 let url = `${this.API_BASE_URL}?action=${action}`;
                 if (method === 'GET' && body) 
                 {
                     url += '&' + new URLSearchParams(body).toString();
                 }
+
                 const options = { method };
                 if (method !== 'GET') 
                 {
-                    options.headers = { 'Content-Type': 'application/json' };
-                    options.body = JSON.stringify(body);
+                    if (isFile) 
+                    { // Para uploads de arquivo, usa FormData.
+                        options.body = body; 
+                    } 
+                    else 
+                    { // Para outros dados, usa JSON.
+                        options.headers = { 'Content-Type': 'application/json' };
+                        options.body = JSON.stringify(body);
+                    }
                 }
-                try 
-                {
+
+                try {
                     const response = await fetch(url, options);
                     const responseData = await response.json().catch(() => ({ message: 'Resposta inválida do servidor.' }));
                     if (!response.ok) throw new Error(responseData.message || `Erro: ${response.statusText}`);
@@ -217,14 +501,14 @@
                 } 
                 catch (error) 
                 {
+                    console.error('API Call Error:', error);
                     this.showNotification(error.message, 'error');
                     return Promise.reject(error);
                 }
             },
 
-            // Funções que lidam com ações do usuario
+            // --- Funções que respondem a ações do usuario ---
 
-            // Envia os dados de login para a API.
             async handleLogin() 
             {
                 const email = document.getElementById('login-email').value;
@@ -240,10 +524,10 @@
                         this.showPage(startPage);
                     }
                 } 
-                catch (error) {}
+                catch (error) 
+                { /* Erro já tratado em apiCall */ }
             },
 
-            // Envia os dados de cadastro para a API.
             async handleRegister() 
             {
                 const name = document.getElementById('register-name').value;
@@ -257,14 +541,15 @@
                     {
                         this.state.currentUser = result.user;
                         this.state.pageHistory = [];
-                        this.showNotification(`Bem-vindo(a), ${name}!`);
                         const startPage = result.user.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
+                        this.showNotification(`Bem-vindo(a), ${name}!`);
                         this.showPage(startPage);
                     }
-                } catch (error) { }
+                } 
+                catch (error) 
+                { /* Erro já tratado em apiCall */ }
             },
             
-            // Encerra a sessao do usuário
             async handleLogout() 
             {
                 await this.apiCall('logout');
@@ -273,7 +558,6 @@
                 this.showPage('login');
             },
 
-            // Verifica com o servidor se o usuario ainda esta logado.
             async checkSession() 
             {
                 try 
@@ -290,10 +574,59 @@
                         this.showPage('login');
                     }
                 } 
-                catch (error) { this.showPage('login'); }
+                catch (error) 
+                { this.showPage('login'); }
+            },
+
+            async handleSaveEvent() 
+            {
+                const eventId = document.getElementById('edit-event-id').value;
+                const programItems = Array.from(document.querySelectorAll('#program-list .program-item')).map(item => ({
+                    time: item.querySelector('input[type="time"]').value,
+                    title: item.querySelector('input[type="text"]').value,
+                })).filter(p => p.time && p.title);
+
+                const eventData = 
+                {
+                    id: eventId || null,
+                    name: document.getElementById('edit-event-name').value,
+                    date: document.getElementById('edit-event-date').value,
+                    location: document.getElementById('edit-event-location').value,
+                    speaker: document.getElementById('edit-event-speaker').value,
+                    workload: parseInt(document.getElementById('edit-event-workload').value, 10),
+                    isOnline: document.getElementById('edit-event-is-online').checked,
+                    description: document.getElementById('edit-event-description').value,
+                    image: document.getElementById('edit-event-image').value,
+                    allowWorkSubmission: document.getElementById('edit-event-allow-submission').checked,
+                    submissionReviewerInfo: { formation: document.getElementById('edit-event-reviewer-formation').value },
+                    program: programItems
+                };
+                try 
+                {
+                    const result = await this.apiCall('create_update_event', 'POST', eventData);
+                    this.showNotification(result.message);
+                    this.showPage('my-organized-events');
+                } 
+                catch(error) 
+                { /* Erro já tratado em apiCall */ }
+            },
+
+            async handleSubmitWork() 
+            {
+                const form = document.getElementById('submit-work-form');
+                const formData = new FormData(form);
+                formData.append('eventId', this.state.currentEventId);
+                try 
+                {
+                    // O 'true' no final indica que esta chamada contém um arquivo.
+                    const result = await this.apiCall('submit_work', 'POST', formData, true);
+                    this.showNotification(result.message);
+                    this.goBack();
+                } 
+                catch(error) 
+                { /* Erro já tratado em apiCall */ }
             },
             
-            // Envia os dados atualizados do perfil para a API
             async handleUpdateProfile() 
             {
                 const profileData = 
@@ -306,17 +639,112 @@
                 {
                     const result = await this.apiCall('update_profile', 'POST', profileData);
                     this.showNotification(result.message);
+                    // Atualiza o estado local para refletir a mudança instantaneamente.
                     this.state.currentUser.nome = profileData.name;
                     this.state.currentUser.email = profileData.email;
                     this.goBack();
                     this.updateUI();
                 } 
-                catch(error) { }
+                catch(error) 
+                { /* Erro já tratado em apiCall */ }
+            },
+            
+            async handleRegisterForEvent(eventId) 
+            {
+                try 
+                {
+                    const result = await this.apiCall('register_for_event', 'POST', { eventId });
+                    this.showNotification(result.message);
+                    this.renderEventDetails(eventId); // Recarrega a página de detalhes.
+                } 
+                catch (error) 
+                { /* Erro já tratado em apiCall */ }
+            },
+            
+            async handleRateEvent(eventId) 
+            {
+                const ratingValue = parseInt(document.getElementById('rating-value').value, 10);
+                if (ratingValue === 0) 
+                {
+                    this.showNotification('Por favor, selecione de 1 a 5 estrelas.', 'error');
+                    return;
+                }
+                const comment = document.getElementById('rating-comment').value;
+                try 
+                {
+                    const result = await this.apiCall('rate_event', 'POST', { eventId, stars: ratingValue, comment });
+                    this.showNotification(result.message);
+                    this.renderEventDetails(eventId); // Recarrega a página de detalhes.
+                } 
+                catch (error) 
+                { /* Erro já tratado em apiCall */ }
             },
 
-            // Funções que desenham as páginas na tela (Renderers) 
+            async handleCloseEvent(eventId) 
+            {
+                if (confirm('Tem certeza que deseja encerrar este evento? Após encerrado, ele não poderá mais ser editado e não aceitará novas inscrições.')) {
+                    try 
+                    {
+                        const result = await this.apiCall('close_event', 'POST', { eventId });
+                        this.showNotification(result.message);
+                        this.showPage('my-organized-events');
+                    } 
+                    catch (error) 
+                    { /* Erro já tratado em apiCall */ }
+                }
+            },
 
-            // Decide qual função de renderização chamar com base na página atual.
+            async handleDeleteEvent(eventId) 
+            {
+                if (confirm('Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.')) 
+                {
+                    try 
+                    {
+                        const result = await this.apiCall('delete_event', 'POST', { eventId });
+                        this.showNotification(result.message);
+                        this.showPage('my-organized-events');
+                    } 
+                    catch (error) 
+                    { /* Erro já tratado em apiCall */ }
+                }
+            },
+
+            async handleSaveWorkReview(workId) 
+            {
+                const grade = document.getElementById(`review-grade-${workId}`).value;
+                const observations = document.getElementById(`review-obs-${workId}`).value;
+                try 
+                {
+                    const result = await this.apiCall('save_work_review', 'POST', { workId, grade, observations });
+                    this.showNotification(result.message);
+                    this.renderReviewWorks(this.state.currentEventId); // Recarrega a página de avaliação.
+                } 
+                catch (error) 
+                { /* Erro já tratado em apiCall */ }
+            },
+
+            async handleIssueCertificate(eventId, userId) 
+            {
+                try 
+                {
+                    const result = await this.apiCall('issue_certificate', 'POST', { eventId, userId });
+                    this.showNotification(result.message);
+                    this.renderManageCertificates(eventId); // Recarrega a página de certificados.
+                } 
+                catch (error) 
+                { /* Erro já tratado em apiCall */ }
+            },
+
+            handlePreviewCertificate(cert) 
+            {
+                const text = `Certificamos que <strong>${cert.userName}</strong> participou do evento "${cert.eventName}", ministrado por <strong>${cert.speakerName}</strong>, com carga horária de <strong>${cert.workload} horas</strong>.`;
+                document.getElementById('certificate-preview-text').innerHTML = text;
+                document.getElementById('certificate-preview-modal').classList.remove('hidden');
+            },
+
+            // --- Renderers: Funções que geram o HTML dinâmico das páginas ---
+            
+            // Função principal que chama a renderização da página correta.
             renderPageContent(pageId) 
             {
                 const targetPage = document.getElementById(`${pageId}-page`);
@@ -327,14 +755,20 @@
                 {
                     case 'home': this.renderEventList(); break;
                     case 'event-details': this.renderEventDetails(this.state.currentEventId); break;
-                    case 'profile': this.renderProfileForm(); break;
                     case 'my-events': this.renderMyEvents(); break;
                     case 'my-certificates': this.renderMyCertificates(); break;
                     case 'my-organized-events': this.renderMyOrganizedEvents(); break;
+                    case 'manage-event': this.renderManageEvent(this.state.currentEventId); break;
+                    case 'manage-certificates': this.renderManageCertificates(this.state.currentEventId); break;
+                    case 'edit-event': this.renderEditEventForm(this.state.currentEventId); break;
+                    case 'profile': this.renderProfileForm(); break;
+                    case 'submit-work': this.renderSubmitWorkForm(this.state.currentEventId); break;
+                    case 'review-works': this.renderReviewWorks(this.state.currentEventId); break;
+                    case 'event-report': this.renderEventReport(this.state.currentEventId); break;
                 }
             },
 
-            // Busca e exibe a lista de eventos na pagina inicial.
+            // Renderiza a lista de todos os eventos na página inicial.
             async renderEventList() 
             {
                 const container = document.getElementById('event-list');
@@ -369,7 +803,7 @@
                 }
             },
 
-            // Busca e exibe os detalhes de um evento específico.
+            // Renderiza os detalhes de um evento específico.
             async renderEventDetails(eventId) 
             {
                 const container = document.getElementById('event-details-page');
@@ -378,21 +812,68 @@
                 {
                     const event = await this.apiCall(`get_event_details`, 'GET', { eventId });
                     
+                    const isEventClosed = event.status === 'closed';
+                    let actionButtonHtml = '';
+                    // Define o botão de ação principal com base no tipo de usuário e status de inscrição.
+                    if (this.state.currentUser.tipo === 'ORGANIZADOR' && this.state.currentUser.id == event.id_organizador) 
+                    {
+                         actionButtonHtml = `<button onclick="app.showPage('manage-event', { eventId: ${event.id} })" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold"><i class="fa-solid fa-cog mr-2"></i>Gerenciar Evento</button>`;
+                    } 
+                    else if(this.state.currentUser.tipo === 'PARTICIPANTE') 
+                    {
+                        if (event.isUserRegistered) 
+                        {
+                            actionButtonHtml = `<button class="w-full bg-green-500 text-white py-3 rounded-lg font-semibold cursor-default" disabled><i class="fa-solid fa-check mr-2"></i>Inscrito</button>`;
+                            // Adiciona botão de submeter trabalho se aplicável.
+                            if (event.permite_submissao == 1 && !isEventClosed && !event.userWork) 
+                            {
+                                actionButtonHtml += `<button onclick="app.showPage('submit-work', { eventId: ${event.id} })" class="w-full mt-2 bg-blue-600 text-white py-3 rounded-lg font-semibold"><i class="fa-solid fa-file-arrow-up mr-2"></i>Submeter Trabalho</button>`;
+                            }
+                        } 
+                        else 
+                        {
+                            actionButtonHtml = isEventClosed 
+                                ? `<button class="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-default" disabled><i class="fa-solid fa-lock mr-2"></i>Inscrições Encerradas</button>`
+                                : `<button onclick="app.handleRegisterForEvent(${event.id})" class="w-full bg-[#820AD1] text-white py-3 rounded-lg font-semibold">Inscrever-se</button>`;
+                        }
+                    }
+                    
+                    // Mostra o status do trabalho submetido, se houver.
+                    let workStatusHtml = '';
+                    if (event.isUserRegistered && event.permite_submissao == 1 && event.userWork) 
+                    {
+                        const gradeHtml = event.userWork.nota !== null ? `<span class="font-bold text-blue-600">${parseFloat(event.userWork.nota).toFixed(1)}</span>` : `<span class="font-semibold text-gray-500">Aguardando avaliação</span>`;
+                        const obsHtml = event.userWork.observacoes ? `<p class="text-sm text-gray-600 mt-2"><strong class="text-gray-800">Observações:</strong> ${event.userWork.observacoes}</p>` : '';
+                        workStatusHtml = `<div class="mt-8"><h3 class="text-xl font-bold border-b pb-2 mb-4">Status do Trabalho</h3><div class="bg-gray-50 p-4 rounded-lg"><h4 class="font-bold">${event.userWork.titulo}</h4><p class="text-sm text-gray-500">${event.userWork.autores}</p><div class="mt-3 text-md"><strong>Nota:</strong> ${gradeHtml}</div>${obsHtml}</div></div>`;
+                    }
+                    
+                    // Mostra a seção de avaliação do evento, se aplicável.
+                    let ratingSectionHtml = '';
+                    if (event.isUserRegistered && isEventClosed && this.state.currentUser.tipo === 'PARTICIPANTE') 
+                    {
+                        ratingSectionHtml = `<div class="mt-8"><h3 class="text-xl font-bold border-b pb-2 mb-4">Avalie este Evento</h3>`;
+                        if (event.userRating) 
+                        { // Se já avaliou
+                            ratingSectionHtml += `<div class="bg-yellow-50 p-4 rounded-lg text-center"><p class="font-semibold">Obrigado pela sua avaliação!</p><p class="text-yellow-500 text-2xl mt-2">${'★'.repeat(event.userRating.estrelas)}${'☆'.repeat(5 - event.userRating.estrelas)}</p>${event.userRating.comentario ? `<p class="mt-2 text-gray-600">"${event.userRating.comentario}"</p>` : ''}</div>`;
+                        } 
+                        else 
+                        { // Se ainda não avaliou
+                            ratingSectionHtml += `<form id="rating-form" onsubmit="event.preventDefault(); app.handleRateEvent(${event.id});"><div class="bg-gray-50 p-4 rounded-lg"><p class="font-semibold mb-2 text-center">Sua nota:</p><div class="rating-stars text-3xl text-center mb-4" data-rating="0"><i class="fa-solid fa-star" onclick="app.setRating(this, 1)"></i><i class="fa-solid fa-star" onclick="app.setRating(this, 2)"></i><i class="fa-solid fa-star" onclick="app.setRating(this, 3)"></i><i class="fa-solid fa-star" onclick="app.setRating(this, 4)"></i><i class="fa-solid fa-star" onclick="app.setRating(this, 5)"></i></div><input type="hidden" id="rating-value" value="0" required><label for="rating-comment" class="block font-medium mb-1">Comentários:</label><textarea id="rating-comment" rows="3" class="w-full p-2 border rounded-lg"></textarea><button type="submit" class="w-full mt-4 bg-[#820AD1] text-white py-2 rounded-lg font-semibold">Enviar Avaliação</button></div></form>`;
+                        }
+                        ratingSectionHtml += `</div>`;
+                    }
+
                     const locationIcon = event.is_online == 1 ? 'fa-video' : 'fa-map-marker-alt';
                     const locationText = event.is_online == 1 ? 'Evento Online' : event.local;
                     const eventDate = new Date(event.data + 'T00:00:00');
-                    
-                    let actionButtonHtml = '';
-                    if (this.state.currentUser.tipo === 'PARTICIPANTE') 
-                    {
-                        actionButtonHtml = `<button class="w-full bg-[#820AD1] text-white py-3 rounded-lg font-semibold">Inscrever-se</button>`;
-                    }
 
+                    // Monta o HTML final da página.
                     container.innerHTML = `
                         <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
                         <div class="bg-white rounded-lg overflow-hidden">
                             <img src="${event.imagem_url}" alt="Banner do Evento" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
                             <div class="p-4">
+                                ${isEventClosed ? '<div class="mb-4 text-center p-2 bg-red-100 text-red-700 font-bold rounded-lg">EVENTO ENCERRADO</div>' : ''}
                                 <h2 class="text-2xl font-bold">${event.nome}</h2>
                                 <p class="text-md text-gray-600 mt-3"><i class="fa-solid fa-user-tie text-gray-400 mr-2"></i>Ministrado por: <strong>${event.palestrante}</strong></p>
                                 <p class="text-md text-gray-600 mt-1"><i class="fa-solid fa-calendar-alt text-gray-400 mr-2"></i>${eventDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
@@ -400,6 +881,8 @@
                                 <div class="mt-6">${actionButtonHtml}</div>
                                 <div class="mt-8"><h3 class="text-xl font-bold border-b pb-2 mb-4">Sobre o Evento</h3><p class="text-gray-700 leading-relaxed">${event.descricao}</p></div>
                                 <div class="mt-8"><h3 class="text-xl font-bold border-b pb-2 mb-4">Programação</h3><div class="space-y-3">${event.program.map(item => `<div class="flex items-center"><span class="bg-gray-100 text-[#820AD1] font-bold py-1 px-3 rounded-full mr-4">${item.horario.substring(0,5)}</span><p>${item.titulo}</p></div>`).join('')}</div></div>
+                                ${workStatusHtml}
+                                ${ratingSectionHtml}
                             </div>
                         </div>`;
                 } 
@@ -409,7 +892,265 @@
                 }
             },
             
-            // Preenche o formulario de perfil com os dados do usuario logado.
+            // Renderiza a lista de inscrições do participante.
+            async renderMyEvents() 
+            {
+                 const container = document.getElementById('my-event-list');
+                 container.innerHTML = '<div class="placeholder-message"><p>Carregando suas inscrições...</p></div>';
+                 try 
+                 {
+                    const events = await this.apiCall('get_my_inscriptions');
+                    if (!events || events.length === 0) 
+                    {
+                        container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-ticket"></i><p>Você ainda não se inscreveu em eventos.</p></div>';
+                        return;
+                    }
+                    const activeEvents = events.filter(e => e.status === 'open');
+                    const closedEvents = events.filter(e => e.status === 'closed');
+                    let content = '<div>';
+                    content += '<h3 class="text-xl font-bold mb-4 border-b pb-2">Inscrições Ativas</h3>';
+                    if (activeEvents.length > 0) 
+                    {
+                        content += '<div class="space-y-6">';
+                        activeEvents.forEach(event => {
+                            const locationText = event.is_online == 1 ? 'Evento Online' : event.local;
+                            const eventDate = new Date(event.data + 'T00:00:00');
+                            content += `<div class="bg-gray-50 p-4 rounded-lg flex gap-4"><div class="qr-code-placeholder flex-shrink-0"></div><div class="flex-grow"><h3 class="font-bold text-lg">${event.nome}</h3><p class="text-gray-500 text-sm mt-1">${eventDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</p><p class="text-gray-500 text-sm">${locationText}</p><button onclick="app.showPage('event-details', { eventId: ${event.id} })" class="mt-3 text-[#820AD1] font-semibold text-sm">Ver Detalhes <i class="fa-solid fa-arrow-right ml-1"></i></button></div></div>`;
+                        });
+                        content += '</div>';
+                    } 
+                    else 
+                    {
+                        content += '<p class="text-gray-500 my-4">Nenhuma inscrição em eventos ativos.</p>';
+                    }
+                    content += '<h3 class="text-xl font-bold mb-4 border-b pb-2 mt-8">Eventos Anteriores</h3>';
+                    if (closedEvents.length > 0) 
+                    {
+                        content += '<div class="space-y-4">';
+                        closedEvents.forEach(event => {
+                            let workInfoHtml = event.nota_trabalho ? `<p class="text-sm text-blue-700 mt-1"><i class="fa-solid fa-file-alt mr-1"></i>Trabalho enviado (Nota: ${parseFloat(event.nota_trabalho).toFixed(1)})</p>` : '';
+                            const eventDate = new Date(event.data + 'T00:00:00');
+                            content += `<div class="bg-gray-100 p-4 rounded-lg opacity-80"><h3 class="font-bold text-gray-800">${event.nome}</h3><p class="text-gray-500 text-sm mt-1">${eventDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</p>${workInfoHtml}<button onclick="app.showPage('event-details', { eventId: ${event.id} })" class="mt-2 text-[#820AD1] font-semibold text-sm">Ver Detalhes e Avaliar <i class="fa-solid fa-arrow-right ml-1"></i></button></div>`;
+                        });
+                        content += '</div>';
+                    } 
+                    else 
+                    {
+                        content += '<p class="text-gray-500 my-4">Nenhum evento anterior encontrado.</p>';
+                    }
+                    content += '</div>';
+                    container.innerHTML = content;
+                 } 
+                 catch (error) 
+                 {
+                     container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar suas inscrições.</p></div>';
+                 }
+            },
+            
+            // Renderiza a lista de eventos criados pelo organizador.
+            async renderMyOrganizedEvents() 
+            {
+                 const container = document.getElementById('my-organized-event-list');
+                 container.innerHTML = '<div class="placeholder-message"><p>Carregando seus eventos criados...</p></div>';
+                 try 
+                 {
+                    const events = await this.apiCall('get_my_organized_events');
+                    if (!events || events.length === 0) 
+                    {
+                        container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-star"></i><p>Você ainda não criou nenhum evento.</p></div>';
+                        return;
+                    }
+                    const activeEvents = events.filter(e => e.status === 'open');
+                    const closedEvents = events.filter(e => e.status === 'closed');
+                    let content = '';
+                    content += '<h3 class="text-xl font-bold mb-4 border-b pb-2">Eventos Ativos</h3>';
+                    if (activeEvents.length > 0) 
+                    {
+                        content += '<div class="space-y-4">';
+                        activeEvents.forEach(event => {
+                            content += `<div class="bg-gray-50 p-4 rounded-lg"><div class="flex justify-between items-start"><div><h3 class="font-bold text-lg">${event.nome}</h3><p class="text-gray-500 text-sm mt-1">${event.attendee_count} participante(s)</p></div></div><button onclick="app.showPage('manage-event', { eventId: ${event.id} })" class="mt-3 bg-green-100 text-green-800 py-2 px-4 rounded-lg font-semibold text-sm"><i class="fa-solid fa-cog mr-2"></i>Gerenciar</button></div>`;
+                        });
+                        content += '</div>';
+                    } 
+                    else 
+                    {
+                        content += '<p class="text-gray-500 my-4">Nenhum evento ativo no momento.</p>';
+                    }
+                    content += '<h3 class="text-xl font-bold mb-4 mt-8 border-b pb-2">Eventos Encerrados</h3>';
+                    if (closedEvents.length > 0) 
+                    {
+                        content += '<div class="space-y-4">';
+                        closedEvents.forEach(event => {
+                            content += `<div class="bg-gray-100 p-4 rounded-lg opacity-80"><h3 class="font-bold text-gray-800">${event.nome}</h3><p class="text-gray-500 text-sm mt-1">${event.attendee_count} participante(s)</p><button onclick="app.showPage('manage-event', { eventId: ${event.id} })" class="mt-3 bg-blue-100 text-blue-800 py-2 px-4 rounded-lg font-semibold text-sm"><i class="fa-solid fa-cog mr-2"></i>Gerenciar</button></div>`;
+                        });
+                        content += '</div>';
+                    } 
+                    else 
+                    {
+                        content += '<p class="text-gray-500 my-4">Nenhum evento encerrado.</p>';
+                    }
+                    container.innerHTML = content;
+                 } 
+                 catch (error) 
+                 {
+                     container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar seus eventos.</p></div>';
+                 }
+            },
+            
+            // Renderiza a página de gerenciamento de um evento para o organizador.
+            async renderManageEvent(eventId) 
+            {
+                const container = document.getElementById('manage-event-page');
+                container.innerHTML = '<div class="placeholder-message"><p>Carregando gerenciador...</p></div>';
+                try 
+                {
+                    const event = await this.apiCall('get_event_details', 'GET', { eventId });
+                    const isEventClosed = event.status === 'closed';
+
+                    let editButtonHtml = isEventClosed
+                        ? `<a href="#" class="block bg-gray-200 p-4 rounded-lg cursor-not-allowed"><h3 class="font-bold text-gray-500"><i class="fa-solid fa-edit text-gray-400 mr-2"></i>Editar Detalhes</h3><p class="text-sm text-gray-500 mt-1">Evento encerrado, não é possível editar.</p></a>`
+                        : `<a href="#" onclick="app.showPage('edit-event', { eventId: ${event.id} })" class="block bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors"><h3 class="font-bold"><i class="fa-solid fa-edit text-gray-400 mr-2"></i>Editar Detalhes</h3><p class="text-sm text-gray-600 mt-1">Modifique nome, data, programação, etc.</p></a>`;
+                    
+                    let reviewWorksButtonHtml = event.permite_submissao == 1
+                        ? `<a href="#" onclick="app.showPage('review-works', { eventId: ${event.id} })" class="block bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors"><h3 class="font-bold"><i class="fa-solid fa-file-pen text-gray-400 mr-2"></i>Avaliar Trabalhos</h3><p class="text-sm text-gray-600 mt-1">Veja e dê notas aos trabalhos submetidos.</p></a>`
+                        : '';
+                        
+                    let reportsButtonHtml = isEventClosed
+                        ? `<a href="#" onclick="app.showPage('event-report', { eventId: ${event.id} })" class="block bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition-colors"><h3 class="font-bold text-blue-800"><i class="fa-solid fa-chart-line text-blue-400 mr-2"></i>Relatório de Avaliações</h3><p class="text-sm text-blue-700 mt-1">Veja as notas e comentários dos participantes.</p></a>`
+                        : '';
+
+                    let closeOrDeleteButtonHtml = isEventClosed ? '' : `
+                        <div class="mt-6 border-t pt-6 space-y-4">
+                            <div class="block bg-yellow-50 p-4 rounded-lg">
+                                <h3 class="font-bold text-yellow-800"><i class="fa-solid fa-lock mr-2"></i>Encerrar Evento</h3>
+                                <p class="text-sm text-yellow-700 mt-1">Bloqueia novas inscrições e edições.</p>
+                                <button onclick="app.handleCloseEvent(${event.id})" class="mt-2 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-yellow-600">Encerrar este Evento</button>
+                            </div>
+                            <div onclick="app.handleDeleteEvent(${event.id})" class="block bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors cursor-pointer">
+                                <h3 class="font-bold text-red-700"><i class="fa-solid fa-trash-alt mr-2"></i>Excluir Evento</h3>
+                                <p class="text-sm text-red-600 mt-1">Esta ação é irreversível.</p>
+                            </div>
+                        </div>`;
+
+                    container.innerHTML = `
+                        <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                        <h2 class="text-2xl font-bold">Gerenciar: ${event.nome}</h2>
+                        ${isEventClosed ? '<p class="mb-4 p-2 bg-red-100 text-red-700 font-bold rounded-lg text-center">EVENTO ENCERRADO</p>' : '<p class="text-gray-600 mb-8">Opções de gerenciamento para seu evento.</p>'}
+                        <div class="space-y-4">
+                            ${editButtonHtml}
+                            ${reviewWorksButtonHtml}
+                            <a href="#" onclick="app.showPage('manage-certificates', { eventId: ${event.id} })" class="block bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors">
+                                <h3 class="font-bold"><i class="fa-solid fa-award text-gray-400 mr-2"></i>Emitir Certificados</h3>
+                                <p class="text-sm text-gray-600 mt-1">Gere certificados para os participantes.</p>
+                            </a>
+                            ${reportsButtonHtml}
+                            ${closeOrDeleteButtonHtml}
+                        </div>`;
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar o gerenciador.</p></div>';
+                }
+            },
+
+            // Preenche o formulário de edição com os dados de um evento existente ou o limpa para um novo evento.
+            async renderEditEventForm(eventId) 
+            {
+                const form = document.getElementById('edit-event-form');
+                const title = document.getElementById('edit-event-title');
+                form.reset();
+                document.getElementById('program-list').innerHTML = '';
+                this.toggleReviewerInfo(false); 
+
+                if (!eventId) 
+                { // Se não houver eventId, é um novo evento.
+                    title.textContent = "Criar Novo Evento";
+                    document.getElementById('edit-event-id').value = '';
+                    this.addProgramItem(); 
+                } 
+                else 
+                { // Se houver, busca os dados do evento para editar.
+                    title.textContent = "Editar Evento";
+                    try 
+                    {
+                        const event = await this.apiCall('get_event_details', 'GET', { eventId });
+                        document.getElementById('edit-event-id').value = event.id;
+                        document.getElementById('edit-event-name').value = event.nome;
+                        document.getElementById('edit-event-date').value = event.data;
+                        document.getElementById('edit-event-location').value = event.local;
+                        document.getElementById('edit-event-speaker').value = event.palestrante || '';
+                        document.getElementById('edit-event-workload').value = event.carga_horaria || '';
+                        document.getElementById('edit-event-description').value = event.descricao;
+                        document.getElementById('edit-event-image').value = event.imagem_url;
+                        document.getElementById('edit-event-is-online').checked = event.is_online == 1;
+                        document.getElementById('edit-event-allow-submission').checked = event.permite_submissao == 1;
+                        
+                        this.toggleReviewerInfo(event.permite_submissao == 1);
+                        document.getElementById('edit-event-reviewer-formation').value = event.info_revisor_formacao || '';
+                        
+                        if(event.program && event.program.length > 0) {
+                           event.program.forEach(item => this.addProgramItem(item.horario, item.titulo));
+                        } 
+                        else 
+                        {
+                           this.addProgramItem();
+                        }
+                    } 
+                    catch(error) 
+                    {
+                        this.showNotification('Erro ao carregar dados do evento para edição.', 'error');
+                    }
+                }
+            },
+
+            // Renderiza a lista de certificados do participante.
+            async renderMyCertificates() 
+            {
+                const container = document.getElementById('my-certificate-list');
+                container.innerHTML = '<div class="placeholder-message"><p>Carregando seus certificados...</p></div>';
+                try 
+                {
+                    const certs = await this.apiCall('get_my_certificates');
+                    if (!certs || certs.length === 0) 
+                    {
+                        container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-award"></i><p>Você ainda não possui certificados.</p></div>';
+                        return;
+                    }
+                    container.innerHTML = certs.map(cert => {
+                        const certData = {
+                            id: cert.id,
+                            eventName: cert.eventName,
+                            userName: this.state.currentUser.nome,
+                            speakerName: cert.speakerName,
+                            workload: cert.workload
+                        };
+                        return `
+                        <div class="bg-gray-50 p-4 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-award text-3xl text-yellow-500 mr-4"></i>
+                                <div>
+                                    <p class="font-bold">Certificado de Participação</p>
+                                    <p class="text-gray-600 text-sm">${cert.eventName}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick='app.handlePreviewCertificate(${JSON.stringify(certData)})' class="text-blue-600 hover:text-blue-800" title="Visualizar Certificado">
+                                    <i class="fa-solid fa-eye fa-lg"></i>
+                                </button>
+                                <button onclick="app.showNotification('Simulação de download do PDF.')" class="text-[#820AD1] hover:text-[#6c08ad]" title="Baixar Certificado">
+                                    <i class="fa-solid fa-download fa-lg"></i>
+                                </button>
+                            </div>
+                        </div>`;
+                    }).join('');
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar os certificados.</p></div>';
+                }
+            },
+
+            // Preenche o formulário de perfil com os dados do usuário.
             renderProfileForm() 
             {
                 if (!this.state.currentUser) return;
@@ -418,41 +1159,173 @@
                 document.getElementById('profile-password').value = '';
             },
 
-            // Exibe a mensagem padrão para a aba Minhas Inscrições
-            renderMyEvents() 
+            // Prepara o formulário de submissão de trabalho.
+            async renderSubmitWorkForm(eventId) 
             {
-                const container = document.getElementById('my-events-page');
-                container.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-6">Minhas Inscrições</h2>
-                    <div class="placeholder-message"><i class="fa-solid fa-ticket"></i><p>Você ainda não se inscreveu em nenhum evento.</p></div>`;
+                try 
+                {
+                    const event = await this.apiCall('get_event_details', 'GET', { eventId });
+                    document.getElementById('submit-work-event-name').textContent = `Para o evento: ${event.nome}`;
+                    document.getElementById('submit-work-form').reset();
+                } 
+                catch(error) 
+                {
+                    this.goBack();
+                }
             },
             
-            // Exibe a mensagem padrão para a aba Meus Certificados.
-            renderMyCertificates() 
+            // Renderiza a página para o organizador avaliar trabalhos.
+            async renderReviewWorks(eventId) 
             {
-                const container = document.getElementById('my-certificates-page');
-                container.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-6">Meus Certificados</h2>
-                    <div class="placeholder-message"><i class="fa-solid fa-award"></i><p>Você ainda não possui certificados.</p></div>`;
+                const container = document.getElementById('review-works-page');
+                container.innerHTML = '<div class="placeholder-message"><p>Carregando trabalhos...</p></div>';
+                try 
+                {
+                    const works = await this.apiCall('get_works_for_review', 'GET', { eventId });
+                    const event = await this.apiCall('get_event_details', 'GET', { eventId });
+                    
+                    let worksHtml = '';
+                    if (!works || works.length === 0) 
+                    {
+                        worksHtml = '<div class="placeholder-message"><i class="fa-solid fa-file-circle-xmark"></i><p>Nenhum trabalho submetido para este evento.</p></div>';
+                    } 
+                    else 
+                    {
+                        worksHtml = works.map(work => `
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <div class="mb-3 border-b pb-3">
+                                <h4 class="font-bold text-lg">${work.titulo}</h4>
+                                <p class="text-sm text-gray-500"><strong>Autores:</strong> ${work.autores}</p>
+                                <p class="text-sm text-gray-500"><strong>Enviado por:</strong> ${work.user_name}</p>
+                                <p class="text-sm text-gray-600 mt-2"><strong>Resumo:</strong> ${work.resumo}</p>
+                                <a href="uploads/${work.nome_arquivo}" target="_blank" class="text-sm text-blue-600 mt-1 font-semibold block"><i class="fa-solid fa-file-pdf mr-2"></i>${work.nome_arquivo || 'arquivo.pdf'}</a>
+                            </div>
+                            <form onsubmit="event.preventDefault(); app.handleSaveWorkReview(${work.id});">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="md:col-span-2">
+                                        <label for="review-obs-${work.id}" class="block font-medium text-sm mb-1">Observações</label>
+                                        <textarea id="review-obs-${work.id}" rows="2" class="w-full p-2 border rounded-lg">${work.observacoes || ''}</textarea>
+                                    </div>
+                                    <div>
+                                        <label for="review-grade-${work.id}" class="block font-medium text-sm mb-1">Nota (0-10)</label>
+                                        <input type="number" id="review-grade-${work.id}" min="0" max="10" step="0.5" class="w-full p-2 border rounded-lg" value="${work.nota !== null ? work.nota : ''}">
+                                    </div>
+                                </div>
+                                <button type="submit" class="mt-3 bg-green-500 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-green-600">Salvar Avaliação</button>
+                            </form>
+                        </div>`).join('');
+                    }
+                    container.innerHTML = `
+                        <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                        <h2 class="text-2xl font-bold">Avaliar Trabalhos</h2>
+                        <p class="text-gray-600 mb-6">Evento: ${event.nome}</p>
+                        <div class="space-y-4">${worksHtml}</div>`;
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar os trabalhos.</p></div>';
+                }
+            },
+            
+            // Renderiza a pagina para o organizador emitir certificados.
+            async renderManageCertificates(eventId) 
+            {
+                const container = document.getElementById('manage-certificates-page');
+                container.innerHTML = '<div class="placeholder-message"><p>Carregando participantes...</p></div>';
+                try 
+                {
+                    const attendees = await this.apiCall('get_attendees_for_certificate', 'GET', { eventId });
+                    const event = await this.apiCall('get_event_details', 'GET', { eventId });
+                    
+                    let attendeesHtml = '';
+                    if (!attendees || attendees.length === 0) 
+                    {
+                        attendeesHtml = '<div class="placeholder-message"><i class="fa-solid fa-users-slash"></i><p>Nenhum participante inscrito neste evento.</p></div>';
+                    } 
+                    else 
+                    {
+                        attendeesHtml = attendees.map(user => `
+                        <div class="bg-white p-3 rounded-lg flex justify-between items-center border">
+                            <div>
+                                <p class="font-semibold">${user.nome}</p>
+                                <p class="text-sm text-gray-500">${user.email}</p>
+                            </div>
+                            <button id="cert-btn-${user.id}" onclick="app.handleIssueCertificate(${eventId}, ${user.id})" 
+                                class="py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${user.has_certificate == 1 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}"
+                                ${user.has_certificate == 1 ? 'disabled' : ''}>
+                                ${user.has_certificate == 1 ? '<i class="fa-solid fa-check mr-2"></i>Emitido' : '<i class="fa-solid fa-award mr-2"></i>Emitir'}
+                            </button>
+                        </div>`).join('');
+                    }
+                     container.innerHTML = `
+                        <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                        <h2 class="text-2xl font-bold">Emitir Certificados</h2>
+                        <p class="text-gray-600 mb-6">Para o evento: ${event.nome}</p>
+                        <div class="space-y-3">${attendeesHtml}</div>`;
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar os participantes.</p></div>';
+                }
             },
 
-            // Exibe a mensagem padrão para a aba Meus Eventos do organizador.
-            renderMyOrganizedEvents() 
+            // Renderiza o relatorio de avaliações de um evento.
+            async renderEventReport(eventId) 
             {
-                const container = document.getElementById('my-organized-events-page');
-                container.innerHTML = `
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Meus Eventos Criados</h2>
-                        <button class="bg-[#820AD1] text-white py-2 px-4 rounded-full hover:bg-[#6c08ad] transition font-semibold">
-                            <i class="fa-solid fa-plus mr-2"></i>Novo Evento
-                        </button>
-                    </div>
-                    <div class="placeholder-message"><i class="fa-solid fa-star"></i><p>Você ainda não criou nenhum evento.</p></div>`;
+                const container = document.getElementById('event-report-page');
+                container.innerHTML = '<div class="placeholder-message"><p>Carregando relatório...</p></div>';
+                try 
+                {
+                    const report = await this.apiCall('get_event_report', 'GET', { eventId });
+                    const event = await this.apiCall('get_event_details', 'GET', { eventId });
+
+                    let reportContent = '';
+                    if (report.summary.total_ratings > 0) 
+                    {
+                        const commentsHtml = report.comments.map(r => `
+                        <div class="bg-white p-4 rounded-lg border">
+                            <p class="text-yellow-500 text-xl">${'★'.repeat(r.estrelas)}${'☆'.repeat(5 - r.estrelas)}</p>
+                            <p class="text-gray-700 mt-2 text-lg"><em>"${r.comentario}"</em></p>
+                        </div>`).join('');
+
+                        reportContent = `
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6 border">
+                            <h3 class="text-xl font-bold mb-4 text-center">Resumo Geral</h3>
+                            <div class="flex justify-around text-center divide-x">
+                                <div class="px-4 flex-1">
+                                    <p class="text-4xl font-bold text-[#820AD1]">${parseFloat(report.summary.average_rating).toFixed(1)}</p>
+                                    <p class="text-gray-600">Média de Estrelas</p>
+                                </div>
+                                <div class="px-4 flex-1">
+                                    <p class="text-4xl font-bold text-[#820AD1]">${report.summary.total_ratings}</p>
+                                    <p class="text-gray-600">Total de Avaliações</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Comentários Anônimos</h3>
+                            <div class="space-y-4">${commentsHtml || '<div class="text-center bg-white rounded-lg p-6 border"><p class="text-gray-500">Nenhum comentário foi deixado.</p></div>'}</div>
+                        </div>`;
+                    } 
+                    else 
+                    {
+                        reportContent = '<div class="placeholder-message"><i class="fa-solid fa-face-frown"></i><p>Nenhuma avaliação foi recebida para este evento.</p></div>';
+                    }
+                    container.innerHTML = `
+                        <button onclick="app.goBack()" class="mb-4 text-[#820AD1] font-semibold"><i class="fa-solid fa-arrow-left mr-2"></i>Voltar</button>
+                        <h2 class="text-2xl font-bold">Relatório de Avaliações</h2>
+                        <p class="text-gray-600 mb-6">Para o evento: <strong>${event.nome}</strong></p>
+                        ${reportContent}`;
+                } 
+                catch (error) 
+                {
+                    container.innerHTML = '<div class="placeholder-message"><i class="fa-solid fa-circle-exclamation"></i><p>Não foi possível carregar o relatório.</p></div>';
+                }
             },
 
-            // Funções auxiliares para controlar a interface 
+            // --- UI & Helpers: Funções auxiliares para controlar a interface ---
 
-            // Controla qual página esta visivel.
+            // Controla a exibição das páginas e o histórico de navegação.
             showPage(pageId, data = null) 
             {
                 if (this.state.currentPage !== pageId && this.state.currentPage !== 'going-back') 
@@ -461,27 +1334,29 @@
                 }
                 this.state.currentPage = pageId;
                 if (data && data.eventId !== undefined) this.state.currentEventId = data.eventId;
+                else if (pageId === 'edit-event') this.state.currentEventId = data ? data.eventId : null;
                 
                 this.updateUI();
                 this.renderPageContent(pageId);
                 window.scrollTo(0, 0); 
             },
-            // Permite voltar para a pagina anterior
+
+            // Navega para a página anterior no histórico.
             goBack() 
             {
                 const lastPage = this.state.pageHistory.pop();
-                if (lastPage && lastPage.page) 
-                {
+                if (lastPage && lastPage.page) {
                     this.state.currentPage = 'going-back'; 
                     this.showPage(lastPage.page, lastPage.data);
-                }
+                } 
                 else 
                 {
-                    const startPage = this.state.currentUser.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
-                    this.showPage(startPage);
+                    const homePage = this.state.currentUser.tipo === 'ORGANIZADOR' ? 'my-organized-events' : 'home';
+                    this.showPage(homePage);
                 }
             },
-            // Atualiza a interface geral (cabeçalho, rodape) com base no estado de login.
+
+            // Atualiza elementos globais da UI (cabeçalho, navegação) com base no estado (logado/deslogado).
             updateUI() 
             {
                 const header = document.getElementById('app-header');
@@ -508,7 +1383,8 @@
                     bottomNav.style.display = 'none';
                 }
             },
-            // Atualiza a barra de navegação inferior com base no tipo de usuario.
+
+            // Atualiza os links na barra de navegação inferior com base no tipo de usuário.
             updateBottomNav() 
             {
                 const nav = document.getElementById('bottom-nav');
@@ -519,23 +1395,23 @@
                 const userType = this.state.currentUser.tipo;
                 const page = this.state.currentPage;
                 let linksHtml = '';
-
                 if (userType === 'PARTICIPANTE') 
                 {
                     linksHtml = `
-                        <a href="#" class="nav-item ${['home', 'event-details'].includes(page) ? 'active' : ''}" onclick="app.showPage('home')"><i class="fa-solid fa-house"></i><span>Eventos</span></a>
+                        <a href="#" class="nav-item ${['home', 'event-details', 'submit-work'].includes(page) ? 'active' : ''}" onclick="app.showPage('home')"><i class="fa-solid fa-house"></i><span>Eventos</span></a>
                         <a href="#" class="nav-item ${page === 'my-events' ? 'active' : ''}" onclick="app.showPage('my-events')"><i class="fa-solid fa-ticket"></i><span>Inscrições</span></a>
                         <a href="#" class="nav-item ${page === 'my-certificates' ? 'active' : ''}" onclick="app.showPage('my-certificates')"><i class="fa-solid fa-award"></i><span>Certificados</span></a>`;
                 } 
                 else if (userType === 'ORGANIZADOR') 
                 {
                      linksHtml = `
-                        <a href="#" class="nav-item ${page === 'my-organized-events' ? 'active' : ''}" onclick="app.showPage('my-organized-events')"><i class="fa-solid fa-star"></i><span>Meus Eventos</span></a>
-                        <a href="#" class="nav-item ${['home', 'event-details'].includes(page) ? 'active' : ''}" onclick="app.showPage('home')"><i class="fa-solid fa-calendar-days"></i><span>Ver Todos</span></a>`;
+                        <a href="#" class="nav-item ${['my-organized-events', 'manage-event', 'manage-certificates', 'edit-event', 'review-works', 'event-report'].includes(page) ? 'active' : ''}" onclick="app.showPage('my-organized-events')"><i class="fa-solid fa-star"></i><span>Meus Eventos</span></a>
+                        <a href="#" class="nav-item ${page === 'home' || page === 'event-details' ? 'active' : ''}" onclick="app.showPage('home')"><i class="fa-solid fa-calendar-days"></i><span>Ver Todos</span></a>`;
                 }
                 nav.innerHTML = linksHtml;
             },
-            // Exibe o modal de notificaçao.
+
+            // Mostra o modal de notificação com uma mensagem.
             showNotification(message, type = 'success') 
             {
                 const modal = document.getElementById('notification-modal');
@@ -543,10 +1419,41 @@
                 messageP.textContent = message;
                 messageP.className = type === 'error' ? 'text-lg text-red-700' : 'text-lg text-gray-800';
                 modal.classList.remove('hidden');
+            },
+
+            // Adiciona um novo item (horário/atividade) ao formulário de programação do evento.
+            addProgramItem(time = '', title = '') 
+            {
+                const container = document.getElementById('program-list');
+                const newItem = document.createElement('div');
+                newItem.className = 'flex items-center gap-2 program-item';
+                newItem.innerHTML = `<input type="time" class="p-2 border rounded-lg bg-white" value="${time ? time.substring(0,5) : ''}" required><input type="text" placeholder="Descrição da Atividade" class="w-full p-2 border rounded-lg" value="${title}" required><button type="button" onclick="this.parentElement.remove()" class="bg-red-100 text-red-700 h-10 w-10 rounded-lg font-bold text-lg hover:bg-red-200 transition">&times;</button>`;
+                container.appendChild(newItem);
+            },
+            
+            // Mostra/esconde a seção de informações do avaliador no formulário de evento.
+            toggleReviewerInfo(show) 
+            {
+                  const container = document.getElementById('reviewer-info-container');
+                  const formationInput = document.getElementById('edit-event-reviewer-formation');
+                  container.classList.toggle('hidden', !show);
+                  formationInput.required = show;
+            },
+
+            // Define a avaliação por estrelas na interface.
+            setRating(starElement, rating) 
+            {
+                const parent = starElement.parentElement;
+                parent.dataset.rating = rating;
+                document.getElementById('rating-value').value = rating;
+                parent.classList.add('selected');
+                Array.from(parent.children).forEach((star, index) => {
+                       star.style.color = index < rating ? '#f59e0b' : '#d1d5db';
+                });
             }
         };
 
-        // Inicia a aplicaçao quando a janela do navegador termina de carregar
+        // Inicia a aplicação quando a janela do navegador terminar de carregar.
         window.onload = () => app.init();
     </script>
 </body>
