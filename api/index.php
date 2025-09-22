@@ -1,226 +1,588 @@
 <?php
-// Define as regras de comunicação da API, permitindo que o frontend acesse este backend
+// Configura os cabeçalhos HTTP para a API
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Responde a uma verificação inicial que o navegador faz
+// Responde a requisiçoes do tipo OPTIONS
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') 
 {
     http_response_code(200);
     exit();
 }
 
-// Inicia a sessao para lembrar qual usuário está logado.
+// Inicia a sessão, essencial para armazenar informações de login do usuario
 session_start();
-// Inclui o arquivo de conexão com o banco de dados
+
+// Inclui o arquivo que contem a lógica de conexão com o banco de dados
 require_once '../config/Database.php';
 
-// Estabelece a conexão com o banco de dados
+// Cria uma nova instância da classe Database e estabelece a conexão
 $database = new Database();
-$conexao = $database->conectar();
+$db = $database->connect();
 
-// Pega a ação desejada da URL (ex: ?action=login)
-$acao = isset($_GET['action']) ? $_GET['action'] : '';
-// Pega o ID do evento da URL, se houver.
-$idEvento = isset($_GET['eventId']) ? intval($_GET['eventId']) : null;
-// Pega os dados JSON enviados pelo frontend (ex: email e senha).
-$dados = json_decode(file_get_contents("php://input"));
+// Obtém a ação desejada a partir da URL
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+$eventId = isset($_GET['eventId']) ? intval($_GET['eventId']) : null;
 
-// Função para enviar uma resposta em JSON e encerrar o script.
-function enviar_resposta($dados, $codigo_status = 200) 
+// Lê e decodifica os dados JSON enviados no corpo da requisição
+$data = json_decode(file_get_contents("php://input"));
+
+// Função utilitária para padronizar o envio de respostas JSON
+function send_response($data, $status_code = 200) 
 {
-    http_response_code($codigo_status);
-    echo json_encode($dados);
-    exit();
+    http_response_code($status_code);
+    echo json_encode($data);
+    exit(); // Encerra a execução do script após enviar a resposta
 }
 
-// Função que verifica se o usuário está logado antes de permitir uma ação.
-function exigir_login() 
+// Função para verificar se um usuário está logado, bloqueando o acesso se não estiver
+function require_login() 
 {
     if (!isset($_SESSION['user_id'])) 
     {
-        enviar_resposta(['message' => 'Acesso não autorizado.'], 401);
+        send_response(['message' => 'Acesso não autorizado. Por favor, faça login.'], 401);
     }
 }
 
-// Roteador: Direciona a requisição para a função correta com base na acao.
-switch ($acao) 
+// Função para verificar se o usuário logado é do tipo 'ORGANIZADOR'
+function require_organizer() 
 {
+    require_login(); // Primeiro, garante que o usuário está logado
+    if ($_SESSION['user_type'] !== 'ORGANIZADOR') 
+    {
+        send_response(['message' => 'Acesso restrito a organizadores.'], 403);
+    }
+}
+
+
+// Roteador principal da API: com base na action, chama a função correspondente
+switch ($action) 
+{
+    // --- Ações Públicas ---
     case 'login':
-        processarLogin($conexao, $dados);
+        handleLogin($db, $data);
         break;
     case 'register':
-        processarCadastro($conexao, $dados);
+        handleRegister($db, $data);
         break;
     case 'get_events':
-        obterEventos($conexao);
+        getEvents($db);
         break;
     case 'get_event_details':
-        if ($idEvento) obterDetalhesEvento($conexao, $idEvento);
-        else enviar_resposta(['message' => 'ID do evento não fornecido.'], 400);
+        if ($eventId) getEventDetails($db, $eventId);
+        else send_response(['message' => 'ID do evento não fornecido.'], 400);
         break;
+
+    // --- Ações que Exigem Login ---
     case 'logout':
-        exigir_login();
-        processarLogout();
+        require_login();
+        handleLogout();
         break;
     case 'check_session':
-        verificarSessao($conexao);
+        checkSession($db);
         break;
     case 'update_profile':
-        exigir_login();
-        atualizarPerfil($conexao, $dados);
+        require_login();
+        updateProfile($db, $data);
         break;
+    case 'register_for_event':
+        require_login();
+        registerForEvent($db, $data);
+        break;
+    case 'submit_work':
+        require_login();
+        handleSubmitWork($db, $_POST, $_FILES);
+        break;
+    case 'rate_event':
+        require_login();
+        rateEvent($db, $data);
+        break;
+    case 'get_my_inscriptions':
+        require_login();
+        getMyInscriptions($db);
+        break;
+    case 'get_my_certificates':
+        require_login();
+        getMyCertificates($db);
+        break;
+
+    // --- Ações Restritas a Organizadores ---
+    case 'create_update_event':
+        require_organizer();
+        createOrUpdateEvent($db, $data);
+        break;
+    case 'get_my_organized_events':
+        require_organizer();
+        getMyOrganizedEvents($db);
+        break;
+    case 'close_event':
+        require_organizer();
+        closeEvent($db, $data);
+        break;
+    case 'delete_event':
+        require_organizer();
+        deleteEvent($db, $data);
+        break;
+    case 'get_works_for_review':
+        require_organizer();
+        if ($eventId) getWorksForReview($db, $eventId);
+        else send_response(['message' => 'ID do evento não fornecido.'], 400);
+        break;
+    case 'save_work_review':
+        require_organizer();
+        saveWorkReview($db, $data);
+        break;
+    case 'get_attendees_for_certificate':
+        require_organizer();
+        if ($eventId) getAttendeesForCertificate($db, $eventId);
+        else send_response(['message' => 'ID do evento não fornecido.'], 400);
+        break;
+    case 'issue_certificate':
+        require_organizer();
+        issueCertificate($db, $data);
+        break;
+    case 'get_event_report':
+        require_organizer();
+        if ($eventId) getEventReport($db, $eventId);
+        else send_response(['message' => 'ID do evento não fornecido.'], 400);
+        break;
+
     default:
-        enviar_resposta(['message' => 'Ação inválida.'], 400);
+        send_response(['message' => 'Ação não especificada ou inválida.'], 400);
         break;
 }
 
-// Funções que executam as ações
-
-// Valida o login de um usuario.
-function processarLogin($conexao, $dados) 
+// Valida as credenciais do usuário e cria uma sessão.
+function handleLogin($db, $data) 
 {
-    // Busca o usuário pelo email.
-    $stmt = $conexao->prepare("SELECT id, nome, email, tipo, senha FROM usuarios WHERE email = :email LIMIT 1");
-    $stmt->bindParam(':email', $dados->email);
-    $stmt->execute();
-    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Verifica se o usuário existe e se a senha esta correta.
-    if ($usuario && password_verify($dados->password, $usuario['senha'])) 
+    if (empty($data->email) || empty($data->password)) 
     {
-        // Se sim, inicia a sessão e envia os dados do usuário de volta.
-        $_SESSION['user_id'] = $usuario['id'];
-        $_SESSION['user_name'] = $usuario['nome'];
-        $_SESSION['user_type'] = $usuario['tipo'];
-        unset($usuario['senha']);
-        enviar_resposta(['success' => true, 'user' => $usuario]);
+        send_response(['message' => 'Email e senha são obrigatórios.'], 400);
+    }
+    $stmt = $db->prepare("SELECT id, nome, email, tipo, senha FROM usuarios WHERE email = :email LIMIT 1");
+    $stmt->bindParam(':email', $data->email);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($data->password, $user['senha'])) 
+    {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['nome'];
+        $_SESSION['user_type'] = $user['tipo'];
+        unset($user['senha']); // Remove o hash da senha da resposta
+        send_response(['success' => true, 'user' => $user]);
     } 
     else 
     {
-        // Se não, envia uma mensagem de erro.
-        enviar_resposta(['message' => 'Email ou senha incorretos.'], 401);
+        send_response(['message' => 'Email ou senha incorretos.'], 401);
     }
 }
 
-// Cadastra um novo usuario no banco de dados.
-function processarCadastro($conexao, $dados) 
+// Cria um novo usuário no banco de dados
+function handleRegister($db, $data) 
 {
-    // Verifica se o email já está cadastrado.
-    $stmt = $conexao->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmt->bindParam(':email', $dados->email);
+    if (empty($data->name) || empty($data->email) || empty($data->password) || empty($data->type)) 
+    {
+        send_response(['message' => 'Todos os campos são obrigatórios.'], 400);
+    }
+    // Verifica se o email ja esta em uso
+    $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = :email");
+    $stmt->bindParam(':email', $data->email);
     $stmt->execute();
-    if ($stmt->rowCount() > 0) enviar_resposta(['message' => 'Este email já está em uso.'], 409);
-    
-    // Insere o novo usuario no banco com a senha criptografada
-    $sql = "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (:nome, :email, :senha, :tipo)";
-    $stmt = $conexao->prepare($sql);
-    $senha_criptografada = password_hash($dados->password, PASSWORD_DEFAULT);
-    $stmt->bindParam(':nome', $dados->name);
-    $stmt->bindParam(':email', $dados->email);
-    $stmt->bindParam(':senha', $senha_criptografada);
-    $stmt->bindParam(':tipo', $dados->type);
+    if ($stmt->rowCount() > 0) 
+    {
+        send_response(['message' => 'Este email já está em uso.'], 409);
+    }
 
-    // Se o cadastro funcionar, ja inicia a sessão para o novo usuário
+    $query = "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (:nome, :email, :senha, :tipo)";
+    $stmt = $db->prepare($query);
+    $hashed_password = password_hash($data->password, PASSWORD_DEFAULT);
+    $stmt->bindParam(':nome', $data->name);
+    $stmt->bindParam(':email', $data->email);
+    $stmt->bindParam(':senha', $hashed_password);
+    $stmt->bindParam(':tipo', $data->type);
+
     if ($stmt->execute()) 
     {
-        $id_usuario = $conexao->lastInsertId();
-        $_SESSION['user_id'] = $id_usuario;
-        $_SESSION['user_name'] = $dados->name;
-        $_SESSION['user_type'] = $dados->type;
-        $usuario = ['id' => $id_usuario, 'nome' => $dados->name, 'email' => $dados->email, 'tipo' => $dados->type];
-        enviar_resposta(['success' => true, 'user' => $usuario]);
+        // Apos o registro, inicia a sessão para o novo usuário
+        $user_id = $db->lastInsertId();
+        $_SESSION['user_id'] = $user_id;
+        $_SESSION['user_name'] = $data->name;
+        $_SESSION['user_type'] = $data->type;
+        $user = ['id' => $user_id, 'nome' => $data->name, 'email' => $data->email, 'tipo' => $data->type];
+        send_response(['success' => true, 'user' => $user]);
     } 
     else 
     {
-        enviar_resposta(['message' => 'Erro ao registrar usuário.'], 500);
+        send_response(['message' => 'Erro ao registrar usuário.'], 500);
     }
 }
 
-// Encerra a sessão do usuario
-function processarLogout() 
+// Encerra a sessão do usuário.
+function handleLogout() 
 {
     session_destroy();
-    enviar_resposta(['success' => true, 'message' => 'Logout realizado com sucesso.']);
+    send_response(['success' => true, 'message' => 'Logout realizado com sucesso.']);
 }
 
-// Verifica se existe uma sessão ativa
-function verificarSessao($conexao) 
+// Verifica se existe uma sessão ativa e retorna os dados do usuário.
+function checkSession($db) 
 {
     if (isset($_SESSION['user_id'])) 
     {
-        $stmt = $conexao->prepare("SELECT id, nome, email, tipo FROM usuarios WHERE id = :id");
+        $stmt = $db->prepare("SELECT id, nome, email, tipo FROM usuarios WHERE id = :id");
         $stmt->bindParam(':id', $_SESSION['user_id']);
         $stmt->execute();
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($usuario) enviar_resposta(['loggedIn' => true, 'user' => $usuario]);
-    }
-    enviar_resposta(['loggedIn' => false]);
-}
-
-// Busca todos os eventos no banco de dados
-function obterEventos($conexao) 
-{
-    $stmt = $conexao->prepare("SELECT id, nome, data, local, is_online, imagem_url FROM eventos ORDER BY data ASC");
-    $stmt->execute();
-    enviar_resposta($stmt->fetchAll(PDO::FETCH_ASSOC));
-}
-
-// Busca os detalhes de um evento especifico e sua programação
-function obterDetalhesEvento($conexao, $idEvento) 
-{
-    // Busca o evento.
-    $stmt = $conexao->prepare("SELECT * FROM eventos WHERE id = :id");
-    $stmt->bindParam(':id', $idEvento);
-    $stmt->execute();
-    $evento = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$evento) enviar_resposta(['message' => 'Evento não encontrado.'], 404);
-
-    // Busca a programação do evento.
-    $stmt = $conexao->prepare("SELECT horario, titulo FROM programacao WHERE id_evento = :id_evento ORDER BY horario ASC");
-    $stmt->bindParam(':id_evento', $idEvento);
-    $stmt->execute();
-    $evento['program'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    enviar_resposta($evento);
-}
-
-// Atualiza as informações de um usuário no banco de dados
-function atualizarPerfil($conexao, $dados) 
-{
-    // Verifica se o novo email já não está sendo usado por outra pessoa.
-    $stmt = $conexao->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
-    $stmt->execute(['email' => $dados->email, 'id' => $_SESSION['user_id']]);
-    if ($stmt->rowCount() > 0) enviar_resposta(['message' => 'Este email já está em uso por outra conta.'], 409);
-
-    // Se uma nova senha foi enviada, atualiza a senha.
-    if (!empty($dados->password)) 
-    {
-        $sql = "UPDATE usuarios SET nome = :nome, email = :email, senha = :senha WHERE id = :id";
-        $stmt = $conexao->prepare($sql);
-        $senha_criptografada = password_hash($dados->password, PASSWORD_DEFAULT);
-        $stmt->bindParam(':senha', $senha_criptografada);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($user) 
+        {
+            send_response(['loggedIn' => true, 'user' => $user]);
+        } 
+        else
+        {
+            session_destroy();
+            send_response(['loggedIn' => false]);
+        }
     } 
     else 
     {
-        // Senão, atualiza apenas nome e email.
-        $sql = "UPDATE usuarios SET nome = :nome, email = :email WHERE id = :id";
-        $stmt = $conexao->prepare($sql);
+        send_response(['loggedIn' => false]);
     }
-    $stmt->bindParam(':nome', $dados->name);
-    $stmt->bindParam(':email', $dados->email);
+}
+
+// Retorna a lista de eventos com status 'open'
+function getEvents($db) 
+{
+    $stmt = $db->prepare("SELECT id, nome, data, local, is_online, imagem_url FROM eventos WHERE status = 'open' ORDER BY data ASC");
+    $stmt->execute();
+    send_response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Retorna os detalhes completos de um evento específico
+function getEventDetails($db, $eventId) 
+{
+    $stmt = $db->prepare("SELECT * FROM eventos WHERE id = :id");
+    $stmt->bindParam(':id', $eventId);
+    $stmt->execute();
+    $event = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$event) send_response(['message' => 'Evento não encontrado.'], 404);
+
+    // Busca a programação associada ao evento.
+    $stmt = $db->prepare("SELECT horario, titulo FROM programacao WHERE id_evento = :id_evento ORDER BY horario ASC");
+    $stmt->bindParam(':id_evento', $eventId);
+    $stmt->execute();
+    $event['program'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Se o usuário estiver logado, adiciona informações personalizadas (inscrição, trabalho, avaliação).
+    if (isset($_SESSION['user_id'])) 
+    {
+        $userId = $_SESSION['user_id'];
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM inscricoes WHERE id_usuario = :user_id AND id_evento = :event_id");
+        $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+        $event['isUserRegistered'] = $stmt->fetch()['count'] > 0;
+
+        $stmt = $db->prepare("SELECT titulo, autores, nota, observacoes FROM trabalhos WHERE id_usuario = :user_id AND id_evento = :event_id");
+        $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+        $event['userWork'] = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+        $stmt = $db->prepare("SELECT estrelas, comentario FROM avaliacoes WHERE id_usuario = :user_id AND id_evento = :event_id");
+        $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+        $event['userRating'] = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+    send_response($event);
+}
+
+// Cria um novo evento ou atualiza um existente, usando uma transação para garantir a integridade dos dados.
+function createOrUpdateEvent($db, $data) 
+{
+    if (empty($data->name) || empty($data->date) || empty($data->location) || empty($data->description)) 
+    {
+        send_response(['message' => 'Campos obrigatórios estão faltando.'], 400);
+    }
+    $db->beginTransaction(); // Inicia a transação.
+    try 
+    {
+        if (isset($data->id) && !empty($data->id)) { // Se tem ID, atualiza.
+            $stmt = $db->prepare("UPDATE eventos SET nome = :nome, data = :data, local = :local, palestrante = :palestrante, carga_horaria = :carga_horaria, is_online = :is_online, descricao = :descricao, imagem_url = :imagem_url, permite_submissao = :permite_submissao, info_revisor_formacao = :info_revisor_formacao WHERE id = :id AND id_organizador = :id_organizador");
+            $stmt->bindParam(':id', $data->id);
+        } 
+        else 
+        { // Se não tem ID, insere.
+            $stmt = $db->prepare("INSERT INTO eventos (id_organizador, nome, data, local, palestrante, carga_horaria, is_online, descricao, imagem_url, permite_submissao, info_revisor_formacao) VALUES (:id_organizador, :nome, :data, :local, :palestrante, :carga_horaria, :is_online, :descricao, :imagem_url, :permite_submissao, :info_revisor_formacao)");
+        }
+        $formation = $data->submissionReviewerInfo->formation ?? null;
+        $stmt->bindParam(':id_organizador', $_SESSION['user_id']);
+        $stmt->bindParam(':nome', $data->name);
+        // ... (bind de todos os outros parâmetros)
+        $stmt->bindParam(':permite_submissao', $data->allowWorkSubmission, PDO::PARAM_BOOL);
+        $stmt->bindParam(':info_revisor_formacao', $formation);
+        $stmt->execute();
+        $eventId = isset($data->id) && !empty($data->id) ? $data->id : $db->lastInsertId();
+
+        // Limpa e reinsere a programação para simplificar a lógica.
+        $stmt = $db->prepare("DELETE FROM programacao WHERE id_evento = :id_evento");
+        $stmt->execute(['id_evento' => $eventId]);
+        if (!empty($data->program)) 
+        {
+            $stmt = $db->prepare("INSERT INTO programacao (id_evento, horario, titulo) VALUES (:id_evento, :horario, :titulo)");
+            foreach ($data->program as $item) {
+                $stmt->execute(['id_evento' => $eventId, 'horario' => $item->time, 'titulo' => $item->title]);
+            }
+        }
+        $db->commit(); // Confirma a transação
+        send_response(['success' => true, 'message' => 'Evento salvo com sucesso.']);
+    } 
+    catch (Exception $e) 
+    {
+        $db->rollBack(); // Desfaz a transação em caso de erro
+        send_response(['message' => 'Erro ao salvar o evento: ' . $e->getMessage()], 500);
+    }
+}
+
+// Retorna os eventos criados pelo organizador logado
+function getMyOrganizedEvents($db) 
+{
+    $stmt = $db->prepare("SELECT e.id, e.nome, e.status, (SELECT COUNT(*) FROM inscricoes i WHERE i.id_evento = e.id) as attendee_count FROM eventos e WHERE e.id_organizador = :id_organizador ORDER BY e.status, e.data DESC");
+    $stmt->execute(['id_organizador' => $_SESSION['user_id']]);
+    send_response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Retorna os eventos nos quais o usuário está inscrito
+function getMyInscriptions($db) 
+{
+    $stmt = $db->prepare("SELECT e.*, t.nota as nota_trabalho FROM eventos e JOIN inscricoes i ON e.id = i.id_evento LEFT JOIN trabalhos t ON e.id = t.id_evento AND i.id_usuario = t.id_usuario WHERE i.id_usuario = :id_usuario ORDER BY e.status, e.data DESC");
+    $stmt->execute(['id_usuario' => $_SESSION['user_id']]);
+    send_response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Atualiza o perfil (nome, email, senha) do usuário logado
+function updateProfile($db, $data) 
+{
+    if (empty($data->name) || empty($data->email)) 
+    {
+        send_response(['message' => 'Nome e email são obrigatórios.'], 400);
+    }
+    // Verifica se o email já está sendo usado por outro usuário.
+    $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
+    $stmt->execute(['email' => $data->email, 'id' => $_SESSION['user_id']]);
+    if ($stmt->rowCount() > 0) 
+    {
+        send_response(['message' => 'Este email já está em uso por outra conta.'], 409);
+    }
+
+    if (!empty($data->password)) 
+    { // Se uma nova senha foi fornecida, atualiza.
+        $query = "UPDATE usuarios SET nome = :nome, email = :email, senha = :senha WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $hashed_password = password_hash($data->password, PASSWORD_DEFAULT);
+        $stmt->bindParam(':senha', $hashed_password);
+    } 
+    else 
+    { // Caso contrário, mantém a senha atual.
+        $query = "UPDATE usuarios SET nome = :nome, email = :email WHERE id = :id";
+        $stmt = $db->prepare($query);
+    }
+    $stmt->bindParam(':nome', $data->name);
+    $stmt->bindParam(':email', $data->email);
     $stmt->bindParam(':id', $_SESSION['user_id']);
 
-    // Executa a atualizaçao e envia uma resposta.
     if ($stmt->execute()) 
     {
-        $_SESSION['user_name'] = $dados->name;
-        enviar_resposta(['success' => true, 'message' => 'Perfil atualizado com sucesso.']);
+        $_SESSION['user_name'] = $data->name;
+        send_response(['success' => true, 'message' => 'Perfil atualizado com sucesso.']);
     } 
     else 
     {
-        enviar_resposta(['message' => 'Erro ao atualizar o perfil.'], 500);
+        send_response(['message' => 'Erro ao atualizar o perfil.'], 500);
     }
 }
+
+// Inscreve o usuário logado em um evento.
+function registerForEvent($db, $data) 
+{
+    if (empty($data->eventId)) 
+    {
+        send_response(['message' => 'ID do evento não fornecido.'], 400);
+    }
+    $stmt = $db->prepare("INSERT INTO inscricoes (id_usuario, id_evento) VALUES (:id_usuario, :id_evento)");
+    try 
+    {
+        $stmt->execute(['id_usuario' => $_SESSION['user_id'], 'id_evento' => $data->eventId]);
+        send_response(['success' => true, 'message' => 'Inscrição realizada com sucesso!']);
+    } 
+    catch (PDOException $e) 
+    {
+        if ($e->getCode() == 23000) 
+        { // Trata erro de chave duplicada (já inscrito).
+            send_response(['message' => 'Você já está inscrito neste evento.'], 409);
+        } 
+        else 
+        {
+            send_response(['message' => 'Erro ao realizar inscrição: ' . $e->getMessage()], 500);
+        }
+    }
+}
+
+// Lida com o upload do arquivo de um trabalho e salva os dados no banco.
+function handleSubmitWork($db, $postData, $fileData) 
+{
+    if (empty($postData['eventId']) || empty($postData['title']) || !isset($fileData['workFile'])) 
+    {
+        send_response(['message' => 'Todos os campos e o arquivo são obrigatórios.'], 400);
+    }
+    if ($fileData['workFile']['error'] !== UPLOAD_ERR_OK) 
+    {
+        send_response(['message' => 'Erro no upload do arquivo.'], 400);
+    }
+    
+    $uploadDir = '../uploads/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+    
+    $fileName = time() . '_' . basename($fileData['workFile']['name']);
+    $uploadFile = $uploadDir . $fileName;
+
+    if (move_uploaded_file($fileData['workFile']['tmp_name'], $uploadFile)) 
+    {
+        $stmt = $db->prepare("INSERT INTO trabalhos (id_evento, id_usuario, titulo, autores, resumo, nome_arquivo) VALUES (:id_evento, :id_usuario, :titulo, :autores, :resumo, :nome_arquivo)");
+        $stmt->execute([
+            'id_evento' => $postData['eventId'], 'id_usuario' => $_SESSION['user_id'],
+            'titulo' => $postData['title'], 'autores' => $postData['authors'],
+            'resumo' => $postData['abstract'], 'nome_arquivo' => $fileName
+        ]);
+        send_response(['success' => true, 'message' => 'Trabalho enviado com sucesso!']);
+    } 
+    else 
+    {
+        send_response(['message' => 'Falha ao mover o arquivo enviado.'], 500);
+    }
+}
+
+// Salva ou atualiza a avaliação (estrelas e comentário) de um evento.
+function rateEvent($db, $data) 
+{
+    if (empty($data->eventId) || empty($data->stars)) 
+    {
+        send_response(['message' => 'ID do evento e avaliação são obrigatórios.'], 400);
+    }
+    $query = "INSERT INTO avaliacoes (id_evento, id_usuario, estrelas, comentario) VALUES (:id_evento, :id_usuario, :estrelas, :comentario) ON DUPLICATE KEY UPDATE estrelas = :estrelas, comentario = :comentario";
+    $stmt = $db->prepare($query);
+    $stmt->execute([
+        'id_evento' => $data->eventId, 'id_usuario' => $_SESSION['user_id'],
+        'estrelas' => $data->stars, 'comentario' => $data->comment
+    ]);
+    send_response(['success' => true, 'message' => 'Avaliação enviada com sucesso!']);
+}
+
+// Retorna os certificados do usuário logado.
+function getMyCertificates($db) 
+{
+    $stmt = $db->prepare("SELECT c.*, e.nome as eventName, e.palestrante as speakerName, e.carga_horaria as workload FROM certificados c JOIN eventos e ON c.id_evento = e.id WHERE c.id_usuario = :id_usuario");
+    $stmt->execute(['id_usuario' => $_SESSION['user_id']]);
+    send_response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Muda o status de um evento para 'closed'.
+function closeEvent($db, $data) 
+{
+    if (empty($data->eventId)) send_response(['message' => 'ID do evento não fornecido.'], 400);
+    $stmt = $db->prepare("UPDATE eventos SET status = 'closed' WHERE id = :id AND id_organizador = :id_organizador");
+    $stmt->execute(['id' => $data->eventId, 'id_organizador' => $_SESSION['user_id']]);
+    if ($stmt->rowCount() > 0) 
+    {
+        send_response(['success' => true, 'message' => 'Evento encerrado com sucesso.']);
+    } 
+    else 
+    {
+        send_response(['message' => 'Não foi possível encerrar o evento. Verifique se você é o organizador.'], 403);
+    }
+}
+
+// Exclui um evento e seus dados relacionados (em cascata, se configurado no DB).
+function deleteEvent($db, $data) 
+{
+    if (empty($data->eventId)) send_response(['message' => 'ID do evento não fornecido.'], 400);
+    $stmt = $db->prepare("DELETE FROM eventos WHERE id = :id AND id_organizador = :id_organizador");
+    $stmt->execute(['id' => $data->eventId, 'id_organizador' => $_SESSION['user_id']]);
+    if ($stmt->rowCount() > 0) 
+    {
+        send_response(['success' => true, 'message' => 'Evento excluído com sucesso.']);
+    } 
+    else 
+    {
+        send_response(['message' => 'Não foi possível excluir o evento. Verifique se você é o organizador.'], 403);
+    }
+}
+
+// Retorna os trabalhos submetidos para um evento para serem avaliados.
+function getWorksForReview($db, $eventId) 
+{
+    $stmt = $db->prepare("SELECT t.*, u.nome as user_name FROM trabalhos t JOIN usuarios u ON t.id_usuario = u.id WHERE t.id_evento = :id_evento");
+    $stmt->execute(['id_evento' => $eventId]);
+    send_response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Salva a nota e observações para um trabalho específico.
+function saveWorkReview($db, $data) 
+{
+    if (empty($data->workId) || !isset($data->grade)) 
+    {
+        send_response(['message' => 'Dados insuficientes para salvar avaliação.'], 400);
+    }
+    $stmt = $db->prepare("UPDATE trabalhos SET nota = :nota, observacoes = :observacoes WHERE id = :id");
+    $stmt->execute(['nota' => $data->grade, 'observacoes' => $data->observations, 'id' => $data->workId]);
+    send_response(['success' => true, 'message' => 'Avaliação do trabalho salva com sucesso.']);
+}
+
+// Retorna a lista de participantes de um evento para a emissão de certificados.
+function getAttendeesForCertificate($db, $eventId) 
+{
+    $stmt = $db->prepare("SELECT u.id, u.nome, u.email, (SELECT COUNT(*) FROM certificados c WHERE c.id_evento = i.id_evento AND c.id_usuario = i.id_usuario) as has_certificate FROM usuarios u JOIN inscricoes i ON u.id = i.id_usuario WHERE i.id_evento = :id_evento");
+    $stmt->execute(['id_evento' => $eventId]);
+    send_response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// Emite um certificado para um usuário em um evento.
+function issueCertificate($db, $data) 
+{
+    if (empty($data->eventId) || empty($data->userId)) send_response(['message' => 'Dados insuficientes.'], 400);
+    
+    $validation_code = uniqid('pgeca-') . bin2hex(random_bytes(8));
+    $stmt = $db->prepare("INSERT INTO certificados (id_evento, id_usuario, data_emissao, codigo_validacao) VALUES (:id_evento, :id_usuario, CURDATE(), :codigo)");
+    try 
+    {
+        $stmt->execute([
+            'id_evento' => $data->eventId,
+            'id_usuario' => $data->userId,
+            'codigo' => $validation_code
+        ]);
+        send_response(['success' => true, 'message' => 'Certificado emitido com sucesso!']);
+    } 
+    catch (PDOException $e) 
+    {
+        if ($e->getCode() == 23000) { // Trata erro de certificado duplicado.
+            send_response(['message' => 'Este usuário já possui um certificado para este evento.'], 409);
+        } 
+        else 
+        {
+            send_response(['message' => 'Erro ao emitir certificado: ' . $e->getMessage()], 500);
+        }
+    }
+}
+
+// Retorna os dados agregados das avaliações de um evento.
+function getEventReport($db, $eventId) 
+{
+    $stmt = $db->prepare("SELECT AVG(estrelas) as average_rating, COUNT(*) as total_ratings FROM avaliacoes WHERE id_evento = :id");
+    $stmt->execute(['id' => $eventId]);
+    $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $stmt = $db->prepare("SELECT estrelas, comentario FROM avaliacoes WHERE id_evento = :id AND comentario IS NOT NULL AND comentario != ''");
+    $stmt->execute(['id' => $eventId]);
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    send_response(['summary' => $summary, 'comments' => $comments]);
+}
+
 ?>
