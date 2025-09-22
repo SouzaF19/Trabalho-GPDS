@@ -54,7 +54,7 @@ No XAMPP, ela geralmente se encontra em `C:/xampp/htdocs/`.
 
 2.  Crie a Estrutura de Pastas:
     - Dentro de `htdocs`, crie uma pasta principal para o projeto chamada `pgeca`.
-    - Dentro de `pgeca`, crie as subpastas `api` e `config`.
+    - Dentro de `pgeca`, crie as subpastas `api`, `config` e 'uploads'.
 
     A estrutura final deve ser a seguinte:
 
@@ -62,6 +62,7 @@ No XAMPP, ela geralmente se encontra em `C:/xampp/htdocs/`.
     └── pgeca/
         ├── api/
         ├── config/
+        ├── uploads/
         └── index.html
 
 3.  Copie os Arquivos:
@@ -97,5 +98,5 @@ O banco de dados esta somente com um evento de exemplo.
 
 Você deve criar novas contas através da tela de cadastro.
 
-Então deve-se cadastrar dois usuarios, um no modo "Participante" e um no "Organizador" para facilitar os testes.
-
+Então deve-se cadastrar dois usuarios, um no modo "Participante" e um no "Organizador" e alterner 
+entre esses dois perfis de usuario para facilitar os testes.
