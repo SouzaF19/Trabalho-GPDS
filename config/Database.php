@@ -7,12 +7,13 @@ define('DB_NAME', 'pgeca_db');  // O nome do banco de dados que você criou
 
 class Database 
 {
-    private $conexao;
+
+    private $conn;
 
     // Conecta ao banco de dados ao instanciar a classe
-    public function conectar() 
+    public function connect() 
     {
-        $this->conexao = null;
+        $this->conn = null;
 
         try 
         {
@@ -20,21 +21,21 @@ class Database
             $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
             
             // Cria uma instância do PDO (PHP Data Objects)
-            $this->conexao = new PDO($dsn, DB_USER, DB_PASS);
+            $this->conn = new PDO($dsn, DB_USER, DB_PASS);
             
             // Define o modo de erro do PDO para exceção
-            $this->conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Define o modo de busca padrão para retornar arrays associativos
-            $this->conexao->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } 
         catch(PDOException $e) 
         {
             // Em caso de erro na conexão, exibe a mensagem
-            echo 'Erro de Conexão: ' . $e->getMessage();
+            echo 'Connection Error: ' . $e->getMessage();
         }
 
-        return $this->conexao;
+        return $this->conn;
     }
 }
 ?>
