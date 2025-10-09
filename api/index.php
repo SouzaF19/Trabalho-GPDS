@@ -294,9 +294,6 @@ function getEventDetails($db, $eventId)
     send_response($event);
 }
 
-// ==================================================================
-// FUNÇÃO CORRIGIDA
-// ==================================================================
 // Cria um novo evento ou atualiza um existente, usando uma transação para garantir a integridade dos dados.
 function createOrUpdateEvent($db, $data) 
 {
@@ -343,7 +340,7 @@ function createOrUpdateEvent($db, $data)
         $isOnline = !empty($data->isOnline) ? $data->isOnline : false;
         $allowSubmission = !empty($data->allowWorkSubmission) ? $data->allowWorkSubmission : false;
         
-        // VINCULA TODOS OS PARÂMETROS (AQUI ESTAVA O ERRO)
+        // VINCULA TODOS OS PARÂMETROS
         $stmt->bindParam(':id_organizador', $_SESSION['user_id'], PDO::PARAM_INT);
         $stmt->bindParam(':nome', $data->name);
         $stmt->bindParam(':data', $data->date);
