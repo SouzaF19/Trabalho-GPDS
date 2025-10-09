@@ -294,52 +294,98 @@ function getEventDetails($db, $eventId)
     send_response($event);
 }
 
+// ==================================================================
+// FUNÇÃO CORRIGIDA
+// ==================================================================
 // Cria um novo evento ou atualiza um existente, usando uma transação para garantir a integridade dos dados.
 function createOrUpdateEvent($db, $data) 
 {
-    if (empty($data->name) || empty($data->date) || empty($data->location) || empty($data->description)) 
+    // Validação básica dos campos
+    if (empty($data->name) || empty($data->date) || empty($data->location) || empty($data->description) || empty($data->speaker) || empty($data->workload)) 
     {
-        send_response(['message' => 'Campos obrigatórios estão faltando.'], 400);
+        send_response(['message' => 'Todos os campos principais são obrigatórios.'], 400);
     }
+
     $db->beginTransaction(); // Inicia a transação.
     try 
     {
-        if (isset($data->id) && !empty($data->id)) { // Se tem ID, atualiza.
-            $stmt = $db->prepare("UPDATE eventos SET nome = :nome, data = :data, local = :local, palestrante = :palestrante, carga_horaria = :carga_horaria, is_online = :is_online, descricao = :descricao, imagem_url = :imagem_url, permite_submissao = :permite_submissao, info_revisor_formacao = :info_revisor_formacao WHERE id = :id AND id_organizador = :id_organizador");
-            $stmt->bindParam(':id', $data->id);
+        if (isset($data->id) && !empty($data->id)) 
+        { // Se tem ID, ATUALIZA.
+            $stmt = $db->prepare(
+                "UPDATE eventos SET 
+                    nome = :nome, 
+                    data = :data, 
+                    local = :local, 
+                    palestrante = :palestrante, 
+                    carga_horaria = :carga_horaria, 
+                    is_online = :is_online, 
+                    descricao = :descricao, 
+                    imagem_url = :imagem_url, 
+                    permite_submissao = :permite_submissao, 
+                    info_revisor_formacao = :info_revisor_formacao 
+                WHERE id = :id AND id_organizador = :id_organizador"
+            );
+            $stmt->bindParam(':id', $data->id, PDO::PARAM_INT);
         } 
         else 
-        { // Se não tem ID, insere.
-            $stmt = $db->prepare("INSERT INTO eventos (id_organizador, nome, data, local, palestrante, carga_horaria, is_online, descricao, imagem_url, permite_submissao, info_revisor_formacao) VALUES (:id_organizador, :nome, :data, :local, :palestrante, :carga_horaria, :is_online, :descricao, :imagem_url, :permite_submissao, :info_revisor_formacao)");
+        { // Se não tem ID, INSERE.
+            $stmt = $db->prepare(
+                "INSERT INTO eventos 
+                    (id_organizador, nome, data, local, palestrante, carga_horaria, is_online, descricao, imagem_url, permite_submissao, info_revisor_formacao) 
+                VALUES 
+                    (:id_organizador, :nome, :data, :local, :palestrante, :carga_horaria, :is_online, :descricao, :imagem_url, :permite_submissao, :info_revisor_formacao)"
+            );
         }
+        
+        // Prepara as variáveis para o bind
         $formation = $data->submissionReviewerInfo->formation ?? null;
-        $stmt->bindParam(':id_organizador', $_SESSION['user_id']);
+        $imageUrl = !empty($data->image) ? $data->image : null;
+        $isOnline = !empty($data->isOnline) ? $data->isOnline : false;
+        $allowSubmission = !empty($data->allowWorkSubmission) ? $data->allowWorkSubmission : false;
+        
+        // VINCULA TODOS OS PARÂMETROS (AQUI ESTAVA O ERRO)
+        $stmt->bindParam(':id_organizador', $_SESSION['user_id'], PDO::PARAM_INT);
         $stmt->bindParam(':nome', $data->name);
-        // ... (bind de todos os outros parâmetros)
-        $stmt->bindParam(':permite_submissao', $data->allowWorkSubmission, PDO::PARAM_BOOL);
+        $stmt->bindParam(':data', $data->date);
+        $stmt->bindParam(':local', $data->location);
+        $stmt->bindParam(':palestrante', $data->speaker);
+        $stmt->bindParam(':carga_horaria', $data->workload, PDO::PARAM_INT);
+        $stmt->bindParam(':is_online', $isOnline, PDO::PARAM_BOOL);
+        $stmt->bindParam(':descricao', $data->description);
+        $stmt->bindParam(':imagem_url', $imageUrl);
+        $stmt->bindParam(':permite_submissao', $allowSubmission, PDO::PARAM_BOOL);
         $stmt->bindParam(':info_revisor_formacao', $formation);
+        
         $stmt->execute();
+        
         $eventId = isset($data->id) && !empty($data->id) ? $data->id : $db->lastInsertId();
 
         // Limpa e reinsere a programação para simplificar a lógica.
-        $stmt = $db->prepare("DELETE FROM programacao WHERE id_evento = :id_evento");
-        $stmt->execute(['id_evento' => $eventId]);
+        $stmt_delete_program = $db->prepare("DELETE FROM programacao WHERE id_evento = :id_evento");
+        $stmt_delete_program->execute(['id_evento' => $eventId]);
+        
         if (!empty($data->program)) 
         {
-            $stmt = $db->prepare("INSERT INTO programacao (id_evento, horario, titulo) VALUES (:id_evento, :horario, :titulo)");
+            $stmt_insert_program = $db->prepare("INSERT INTO programacao (id_evento, horario, titulo) VALUES (:id_evento, :horario, :titulo)");
             foreach ($data->program as $item) {
-                $stmt->execute(['id_evento' => $eventId, 'horario' => $item->time, 'titulo' => $item->title]);
+                // Garante que não está inserindo itens de programação vazios
+                if (!empty($item->time) && !empty($item->title)) {
+                    $stmt_insert_program->execute(['id_evento' => $eventId, 'horario' => $item->time, 'titulo' => $item->title]);
+                }
             }
         }
-        $db->commit(); // Confirma a transação
+        
+        $db->commit(); // Confirma a transação se tudo deu certo
         send_response(['success' => true, 'message' => 'Evento salvo com sucesso.']);
     } 
     catch (Exception $e) 
     {
         $db->rollBack(); // Desfaz a transação em caso de erro
+        // Retorna uma mensagem de erro mais detalhada para depuração
         send_response(['message' => 'Erro ao salvar o evento: ' . $e->getMessage()], 500);
     }
 }
+
 
 // Retorna os eventos criados pelo organizador logado
 function getMyOrganizedEvents($db) 
