@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Importa a biblioteca Font Awesome para ícone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- NOVA BIBLIOTECA: html2pdf.js para gerar PDF no cliente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eGekGTpIcHQ4zxyXVDyuBO9AgaFobRRg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
         body 
@@ -494,6 +497,8 @@
                 }
 
                 try {
+                    // A verificação de 'download_certificate' foi removida daqui
+                    
                     const response = await fetch(url, options);
                     const responseData = await response.json().catch(() => ({ message: 'Resposta inválida do servidor.' }));
                     if (!response.ok) throw new Error(responseData.message || `Erro: ${response.statusText}`);
@@ -740,6 +745,65 @@
                 const text = `Certificamos que <strong>${cert.userName}</strong> participou do evento "${cert.eventName}", ministrado por <strong>${cert.speakerName}</strong>, com carga horária de <strong>${cert.workload} horas</strong>.`;
                 document.getElementById('certificate-preview-text').innerHTML = text;
                 document.getElementById('certificate-preview-modal').classList.remove('hidden');
+            },
+            
+            // Lida com o clique no botão de download, gerando o PDF no navegador.
+            handleDownloadCertificate(certData)
+            {
+                // Formata os dados
+                const userName = certData.userName;
+                const eventName = certData.eventName;
+                const speakerName = certData.speakerName;
+                const workload = certData.workload;
+                
+                // Formata a data (simulação, idealmente viria do DB)
+                const eventDateFormatted = "data do evento";
+
+                // 1. Cria o conteúdo HTML do certificado
+                const certificateElement = document.createElement('div');
+                certificateElement.style.width = '297mm'; 
+                certificateElement.style.height = '210mm';
+                certificateElement.style.padding = '25mm';
+                certificateElement.style.fontFamily = 'Arial, sans-serif';
+                certificateElement.style.boxSizing = 'border-box';
+                certificateElement.innerHTML = `
+                    <div style="border: 5px solid #820AD1; height: 100%; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                        
+                        <div>
+                            <h1 style="font-size: 28px; font-weight: bold; color: #111; margin-top: 20px;">CERTIFICADO DE PARTICIPAÇÃO</h1>
+                            <i class="fa-solid fa-award" style="font-size: 60px; color: #f59e0b; margin: 20px 0;"></i>
+                        </div>
+
+                        <p style="font-size: 18px; line-height: 1.6; text-align: justify; margin: 40px 0;">
+                            Certificamos que <strong>${userName}</strong> participou do evento 
+                            "<strong>${eventName}</strong>", ministrado por <strong>${speakerName}</strong>, 
+                            com carga horária total de <strong>${workload} horas</strong>.
+                        </p>
+
+                        <div>
+                            <p style="font-size: 16px; font-style: italic; margin-bottom: 5px;">________________________________________</p>
+                            <p style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">${speakerName}</p>
+                            <p style="font-size: 14px;">Palestrante / Organizador</p>
+                        </div>
+                    </div>
+                `;
+
+                // 2. Define as opções para o html2pdf
+                const options = {
+                    margin:       0,
+                    filename:     `certificado_${eventName.replace(/ /g, '_')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                // 3. Chama a biblioteca para gerar o PDF e iniciar o download
+                try {
+                    html2pdf().from(certificateElement).set(options).save();
+                } catch(e) {
+                    console.error("Erro ao gerar PDF:", e);
+                    this.showNotification("Não foi possível gerar o PDF.", "error");
+                }
             },
 
             // --- Renderers: Funções que geram o HTML dinâmico das páginas ---
@@ -1124,6 +1188,7 @@
                             speakerName: cert.speakerName,
                             workload: cert.workload
                         };
+                        
                         return `
                         <div class="bg-gray-50 p-4 rounded-lg flex items-center justify-between">
                             <div class="flex items-center">
@@ -1137,7 +1202,11 @@
                                 <button onclick='app.handlePreviewCertificate(${JSON.stringify(certData)})' class="text-blue-600 hover:text-blue-800" title="Visualizar Certificado">
                                     <i class="fa-solid fa-eye fa-lg"></i>
                                 </button>
-                                <button onclick="app.showNotification('Simulação de download do PDF.')" class="text-[#820AD1] hover:text-[#6c08ad]" title="Baixar Certificado">
+                                
+                                <!-- O botão de download agora chama a função JS -->
+                                <button onclick='app.handleDownloadCertificate(${JSON.stringify(certData)})' 
+                                   class="text-[#820AD1] hover:text-[#6c08ad]" 
+                                   title="Baixar Certificado PDF">
                                     <i class="fa-solid fa-download fa-lg"></i>
                                 </button>
                             </div>
