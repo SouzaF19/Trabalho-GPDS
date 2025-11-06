@@ -18,6 +18,9 @@ session_start();
 // Inclui o arquivo que contem a lógica de conexão com o banco de dados
 require_once '../config/Database.php';
 
+// ATENÇÃO: A biblioteca FPDF foi removida, pois a geração de PDF
+// será feita no frontend (index.html) com JavaScript.
+
 // Cria uma nova instância da classe Database e estabelece a conexão
 $database = new Database();
 $db = $database->connect();
@@ -107,6 +110,7 @@ switch ($action)
         require_login();
         getMyCertificates($db);
         break;
+    // O case 'download_certificate' foi removido
 
     // --- Ações Restritas a Organizadores ---
     case 'create_update_event':
